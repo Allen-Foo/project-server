@@ -13,7 +13,8 @@ class Entity {
     var params = {
       TableName : new this().tableName,
       FilterExpression : filterExpression,
-      ExpressionAttributeValues : expressionAttributeValues
+      ExpressionAttributeValues : expressionAttributeValues,
+      Limit: 1
     };
 
     documentClient.scan(params, function(err, data) {

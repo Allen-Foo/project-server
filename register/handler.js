@@ -26,6 +26,7 @@ module.exports.register = (event, context, callback) => {
     if (user == null) {
       var newUser = new User();
       Utilities.bind(event, newUser);
+      newUser.registerAt = Utilities.getCurrentTime();
       newUser.userId = uuidv4();
       newUser.saveOrUpdate(function(err, user) {
         if (err) callback(err, null);

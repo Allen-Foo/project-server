@@ -14,6 +14,11 @@ class Utilities {
     }
   }
 
+  static getCurrentTime() {
+    var date = new Date(Date.now());
+    return date.toString();
+  }
+
   static uploadFile(bucket, key, file, callback) {
     var buffer = new Buffer(file.base64String, 'base64');
 
