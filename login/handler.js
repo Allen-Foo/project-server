@@ -5,7 +5,7 @@ const ServerConstant = require("../common/ServerConstant");
 
 module.exports.login = (event, context, callback) => {
 
-  // var user = new User();
+  // get user profile by using awsId
 
   var response = new APIResponseLoginModel();
 
