@@ -1,38 +1,17 @@
 const ServerConstant = require("./ServerConstant");
 
-Class DBUtilties() {
-  static updateOrSaveDB(tableName, item) {
-      var params = {
-        Item: item
-        TableName: tableName
-      };
+Class Utilties() {
+  static bind() {
+    // A function bind two object
 
-      docClient.put(params, function(err, data){
-        if(err) {
-          return ServerConstant.API_CODE_DB_ERROR;
-        } else {
-          return ServerConstant.API_CODE_OK;
-        }
-      });
-    }
+    var a = {a:0 , b:0}
+    var b = {a:1 , b:2 , c:10}
 
-  static selectFromDB(tableName, query) {
-    var params = {
-      TableName: 'Table',
-      IndexName: 'Index',
-      KeyConditionExpression: 'HashKey = :hkey and RangeKey > :rkey',
-      ExpressionAttributeValues: {
-        ':hkey': 'key',
-        ':rkey': 2015
-      }
-    };
+    a.id = b.id
+    a.name = b.name
 
-    var documentClient = new AWS.DynamoDB.DocumentClient();
+    Utilties.bind (a, b)
 
-    documentClient.query(params, function(err, data) {
-       if (err) console.log(err);
-       else console.log(data);
-    });
-
+    a = {a:1 , b:2};
   }
 }
