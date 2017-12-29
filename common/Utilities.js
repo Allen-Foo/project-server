@@ -5,8 +5,11 @@ class Utilities {
   static bind(objA, objB) {
     // A function combine a to b
     for (var b in objB) {
-        if (objA[b]) {
-        objB[b] = objA[b]
+      if (objA[b]) {
+        if (Object.keys(objB[b]).length > 0 && typeof objB[b] != "string")
+          this.bind(objA[b], objB[b]);
+        else
+          objB[b] = objA[b];
       }
     }
   }
