@@ -11,6 +11,8 @@ service: users
 provider:
   name: aws
   runtime: nodejs6.10
+  profile: tutor_server
+
 
 # The `functions` block defines what code to deploy
 functions:

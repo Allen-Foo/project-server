@@ -11,24 +11,27 @@ module.exports.login = (event, context, callback) => {
   var response = new APIResponseLoginModel();
 
   // check awsId valid
-  if (!event.awsId.trim()) {
+  if (!event.awsId) {
     response.statusCode = ServerConstant.API_CODE_ACC_NOT_LINKED_AWS_ID;
     callback(null, response);
+    return;
   }
 
   User.findFirst('awsId = :awsId', {':awsId' : event.awsId}, function(err, user) {
-    if (err) callback(err, null);
-    	if (user != null) {
-	      Utilities.bind(user, response);
-	      response.statusCode = ServerConstant.API_CODE_OK;
-	      callback(null, response);
-	    }
-      else {
-      	response.statusCode = ServerConstant.API_CODE_TARGET_USER_NOT_FOUND;
-      	callback(null, response);
-    	}
-    });
-    
-    
-
+    if (err) {
+      callback(err, null);
+      return;
+    } 
+  	if (user != null) {
+      Utilities.bind(user, response);
+      response.statusCode = ServerConstant.API_CODE_OK;
+      callback(null, response);
+      return;
+    }
+    else {
+    	response.statusCode = ServerConstant.API_CODE_TARGET_USER_NOT_FOUND;
+    	callback(null, response);
+      return;
+  	}
+  });
 };
