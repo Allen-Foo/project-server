@@ -10,9 +10,13 @@ class Lesson extends Entity {
     this.lessonAddress = 'null';
     this.lessonDescription = 'null';
     this.lessonName = 'null';
+    this.lessonTutorName = 'null';
+    this.lessonCharge = 'null';
+    this.lessonHoldDay = 'null';
+    this.lessonFrequence = 'null';
     this.lessonOpeningTime = 'null';
     this.lessonClosingTime = 'null';
-    this.registerAt = 'null';
+    this.createAt = 'null';
   }
 }
 
