@@ -6,31 +6,34 @@ const APIResponseRegisterModel = require('../apiResponseModel/APIResponseRegiste
 const Utilities = require('../common/Utilities');
 
 module.exports.register = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
   var response = new APIResponseRegisterModel();
 
   // check awsId valid
-  if (!event.awsId) {
+  if (!data.awsId) {
     response.statusCode = ServerConstant.API_CODE_ACC_NOT_LINKED_AWS_ID;
     callback(null, response);
     return;
   }
 
   // data validation
-  if (!event.email || !event.fullName) {
+  if (!data.email || !data.fullName) {
     response.statusCode = ServerConstant.API_CODE_ACC_INVALID_FIELDS;
     callback(null, response);
     return;
   }
 
   // check duplicate email
-  User.findFirst('email = :email', {':email' : event.email}, function(err, user) {
+  User.findFirst('email = :email', {':email' : data.email}, function(err, user) {
     if (err) {
       callback(err, null);
       return;
     } 
     if (user == null) {
       var newUser = new User();
-      Utilities.bind(event, newUser);
+      Utilities.bind(data, newUser);
       newUser.registerAt = Utilities.getCurrentTime();
       newUser.userId = uuidv4();
       newUser.saveOrUpdate(function(err, user) {
