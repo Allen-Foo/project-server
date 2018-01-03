@@ -6,20 +6,6 @@ class APIResponseBaseModel {
     this.userId = '';
     this.maintenanceSchedule = '';
   }
-
-  toResponseFomat() {
-    var responseBody = {};
-    for (var i in this) {
-      if (i != 'statusCode')
-        responseBody[i] = this[i];
-    }
-    var response = {
-      statusCode: this.statusCode,
-      body: JSON.stringify(responseBody)
-    }
-
-    return response;
-  }
 }
 
 module.exports = APIResponseBaseModel;

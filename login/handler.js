@@ -6,7 +6,7 @@ const Utilities = require('../common/Utilities');
 
 module.exports.login = (event, context, callback) => {
   // get data from the body of event
-  const data = JSON.parse(event.body);
+  const data = event.body;
 
   // get user profile by using awsId
 
@@ -15,7 +15,7 @@ module.exports.login = (event, context, callback) => {
   // check awsId valid
   if (!data.awsId) {
     response.statusCode = ServerConstant.API_CODE_ACC_NOT_LINKED_AWS_ID;
-    callback(null, response.toResponseFomat());
+    callback(null, response);
     return;
   }
 
@@ -27,12 +27,12 @@ module.exports.login = (event, context, callback) => {
   	if (user != null) {
       Utilities.bind(user, response);
       response.statusCode = ServerConstant.API_CODE_OK;
-      callback(null, response.toResponseFomat());
+      callback(null, response);
       return;
     }
     else {
     	response.statusCode = ServerConstant.API_CODE_TARGET_USER_NOT_FOUND;
-    	callback(null, response.toResponseFomat());
+    	callback(null, response);
       return;
   	}
   });
