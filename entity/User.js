@@ -10,10 +10,12 @@ class User extends Entity {
     this.awsId = 'null';
     this.description = 'null';
     this.email = 'null';
-    this.fullName = 'null';
+    this.firstName = 'null';
+    this.lastName = 'null';
     this.isTutor = 'null';
-    this.phone = 'null';
+    this.phoneNumber = 'null';
     this.skill = 'null';
+    this.calendarId = 'null';
     this.registerAt = 'null';
   }
 }
