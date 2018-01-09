@@ -5,7 +5,7 @@ class APIResponseRegisterModel extends APIResponseBaseModel {
       super();
       this.email = '';
       this.gender = '';
-      this.fullName = '';
+      this.username = '';
       this.phone = '';
       this.address = '';
       this.isTutor = false;

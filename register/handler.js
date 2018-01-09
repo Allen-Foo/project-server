@@ -19,7 +19,7 @@ module.exports.register = (event, context, callback) => {
   }
 
   // data validation
-  if (!data.email || !data.fullName) {
+  if (!data.email || !data.username) {
     response.statusCode = ServerConstant.API_CODE_ACC_INVALID_FIELDS;
     callback(null, response);
     return;

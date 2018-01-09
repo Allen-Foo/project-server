@@ -12,8 +12,9 @@ class User extends Entity {
     this.email = 'null';
     this.firstName = 'null';
     this.lastName = 'null';
+    this.username = 'null';
     this.isTutor = 'null';
-    this.phoneNumber = 'null';
+    this.phone = 'null';
     this.skill = 'null';
     this.calendarId = 'null';
     this.registerAt = 'null';
