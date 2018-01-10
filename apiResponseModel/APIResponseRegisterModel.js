@@ -11,6 +11,8 @@ class APIResponseRegisterModel extends APIResponseBaseModel {
       this.isTutor = false;
       this.skill = '';
       this.description = '';
+      this.awsId = '';
+      this.loginType = '';
     }
 
 }

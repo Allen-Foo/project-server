@@ -5,12 +5,14 @@ class APIResponseLoginModel extends APIResponseBaseModel {
       super();
       this.email = '';
       this.gender = '';
-      this.fullName = '';
+      this.username = '';
       this.phone = '';
       this.address = '';
       this.isTutor = false;
       this.skill = '';
       this.description = '';
+      this.awsId = '';
+      this.loginType = '';
     }
 
 }

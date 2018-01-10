@@ -8,6 +8,7 @@ class User extends Entity {
     this.userId = 'null';
     this.address = 'null';
     this.awsId = 'null';
+    this.loginType = 'null';
     this.description = 'null';
     this.email = 'null';
     this.firstName = 'null';
