@@ -26,7 +26,7 @@ module.exports.register = (event, context, callback) => {
   }
 
   // check duplicate email
-  User.findFirst('email = :email', {':email' : data.email}, function(err, user) {
+  User.findFirst('awsId = :awsId', {':awsId' : data.awsId}, function(err, user) {
     if (err) {
       callback(err, null);
       return;
@@ -44,13 +44,20 @@ module.exports.register = (event, context, callback) => {
         response.statusCode = ServerConstant.API_CODE_OK;
         Utilities.bind(newUser, response);
         callback(null, response);
-        return;    
       });
-    }
-    else {
-      response.statusCode = ServerConstant.API_CODE_ACC_DUPLICATE_EMAIL;
-      callback(null, response);
-      return;    
+    } else {
+      if (data.loginType === 'email') {
+        console.log('user login by email:', data.email)
+        response.statusCode = ServerConstant.API_CODE_ACC_DUPLICATE_EMAIL;
+        callback(null, response);  
+      } else {
+        // Facebook or Google login will use this api, the first time will trigger registration,
+        // then the second time will trigger this, something like login
+        console.log('user login by ' + data.loginType + ':' + data.email)
+        Utilities.bind(user, response);
+        response.statusCode = ServerConstant.API_CODE_OK;
+        callback(null, response);
+      }
     }
   });
 
