@@ -19,6 +19,9 @@ class User extends Entity {
     this.skill = 'null';
     this.calendarId = 'null';
     this.registerAt = 'null';
+    this.googleId = 'null';
+    this.facebookId = 'null';
+    this.avatarUrl = 'null';
   }
 }
 

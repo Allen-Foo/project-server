@@ -13,6 +13,9 @@ class APIResponseLoginModel extends APIResponseBaseModel {
       this.description = '';
       this.awsId = '';
       this.loginType = '';
+      this.googleId = '';
+      this.facebookId = '';
+      this.avatarUrl = '';
     }
 
 }
