@@ -20,7 +20,7 @@ class Utilities {
   }
 
   static uploadFile(bucket, key, file, callback) {
-    var buffer = new Buffer(file.base64String, 'base64');
+    var buffer = new Buffer(file, 'base64');
 
     var params = {Bucket: bucket, Key: key, Body: buffer};
     var upload = new AWS.S3.ManagedUpload({params: params});

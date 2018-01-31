@@ -35,3 +35,14 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+
+  upload:
+    handler: upload/handler.upload
+    # The `events` block defines how to trigger the handler.upload code
+    events:
+      - http:
+          path: upload
+          method: post
+          cors: true
+          integration: lambda
