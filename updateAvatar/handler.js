@@ -24,20 +24,18 @@ module.exports.updateAvatar = (event, context, callback) => {
 	      return;
 	    }
 
-	    var newUser = new User();
-		Utilities.bind(user, newUser);
-		// update avatarUrl
-		newUser.avatarUrl = result.Location
+  		// update avatarUrl
+		  user.avatarUrl = result.Location
 
-	    newUser.saveOrUpdate(function(err, user) {
+	    user.saveOrUpdate(function(err, user) {
         if (err) {
           callback(err, null);
           return;
         }
         response.statusCode = ServerConstant.API_CODE_OK;
-        Utilities.bind(newUser, response);
+        Utilities.bind(user, response);
         callback(null, response);
       });
-	})
+	  })
   })
 };
