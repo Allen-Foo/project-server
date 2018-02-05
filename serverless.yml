@@ -65,3 +65,12 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  getClassList:
+    handler: class/handler.getClassList
+    events:
+      - http:
+          path: getClassList
+          method: post
+          cors: true
+          integration: lambda
