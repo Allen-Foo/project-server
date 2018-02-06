@@ -57,6 +57,16 @@ functions:
           cors: true
           integration: lambda
 
+  updateProfile:
+    handler: profile/handler.updateProfile
+    # The `events` block defines how to trigger the handler.updateAvatar code
+    events:
+      - http:
+          path: updateProfile
+          method: post
+          cors: true
+          integration: lambda
+
   createClass:
     handler: class/handler.createClass
     events:
