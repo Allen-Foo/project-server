@@ -35,7 +35,7 @@ class Utilities {
     let now = moment().format('YYYY-MM-DD HH:mm:ss');
     let fileName = sha1(new Buffer(now)) + '.' + fileMime.ext;
 
-    var params = {Bucket: bucket, Key: fileName, Body: buffer};
+    var params = {Bucket: bucket, Key: fileName, Body: buffer, ACL: 'public-read',};
     var upload = new AWS.S3.ManagedUpload({params: params});
     upload.send(function(err, data) {
       if (err) console.log(err)
