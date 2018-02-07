@@ -11,12 +11,12 @@ module.exports.createClass = (event, context, callback) => {
 
   let response = new APIRsponseClassListModel();
 
-  // check classId valid
-  // if (!data.classId) {
-  //   response.statusCode = ServerConstant.API_CODE_ACC_NOT_LINKED_AWS_ID;
-  //   callback(null, response);
-  //   return;
-  // }
+  // check userId valid
+  if (!data.userId) {
+    response.statusCode = ServerConstant.API_CODE_ACC_UNAUTHORIZED;
+    callback(null, response);
+    return;
+  }
 
   // check duplicate email
   
