@@ -7,16 +7,17 @@ class User extends Entity {
     // Create All table attribute
     this.userId = 'null';
     this.address = 'null';
+    this.website = 'null';
     this.awsId = 'null';
     this.loginType = 'null';
-    this.description = 'null';
+    this.introduction = 'null';
     this.email = 'null';
-    this.firstName = 'null';
-    this.lastName = 'null';
+    this.name = 'null';
     this.username = 'null';
     this.isTutor = false;
     this.phone = 'null';
     this.skill = 'null';
+    this.changePw = 'null';
     this.calendarId = 'null';
     this.registerAt = 'null';
     this.googleId = 'null';

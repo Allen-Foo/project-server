@@ -4,13 +4,14 @@ class APIResponseLoginModel extends APIResponseBaseModel {
     constructor(statusCode) {
       super();
       this.email = '';
-      this.gender = '';
       this.username = '';
+      this.name = '';
+      this.website = '';
       this.phone = '';
       this.address = '';
       this.isTutor = false;
       this.skill = '';
-      this.description = '';
+      this.introduction = '';
       this.awsId = '';
       this.loginType = '';
       this.googleId = '';
