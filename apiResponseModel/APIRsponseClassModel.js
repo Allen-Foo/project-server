@@ -3,6 +3,7 @@ var APIResponseBaseModel = require("./APIResponseBaseModel");
 class APIRsponseClassModel extends APIResponseBaseModel {
     constructor(statusCode) {
       super();
+      this.title = '';
       this.category = '';
       this.skill = '';
       this.time = '';

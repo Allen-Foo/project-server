@@ -7,6 +7,7 @@ class Class extends Entity {
     // Create All table attribute
     this.category = 'null';
     this.skill = 'null';
+    this.title = 'null';
     this.time = 'null';
     this.address = 'null';
     this.description = 'null';
