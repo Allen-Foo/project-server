@@ -3,6 +3,7 @@ const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
 const APIRsponseClassListModel = require('../apiResponseModel/APIRsponseClassListModel');
+const APIRsponseClassModel = require('../apiResponseModel/APIRsponseClassModel');
 const Utilities = require('../common/Utilities');
 
 module.exports.createClass = (event, context, callback) => {
@@ -53,3 +54,21 @@ module.exports.getClassList = (event, context, callback) => {
   })
 };
 
+module.exports.getClassDetail = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+  const classId = event.path.id;
+
+  let response = new APIRsponseClassModel();
+
+  Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind(classes, response);
+    callback(null, response);
+  })
+};
