@@ -2,15 +2,15 @@
 const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
-const APIRsponseClassListModel = require('../apiResponseModel/APIRsponseClassListModel');
-const APIRsponseClassModel = require('../apiResponseModel/APIRsponseClassModel');
+const APIResponseClassModel = require('../apiResponseModel/APIRsponseClassModel');
+const APIResponseClassListModel = require('../apiResponseModel/APIResponseClassListModel');
 const Utilities = require('../common/Utilities');
 
 module.exports.createClass = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  let response = new APIRsponseClassListModel();
+  let response = new APIResponseClassListModel();
 
   // check userId valid
   if (!data.userId) {
@@ -40,7 +40,7 @@ module.exports.getClassList = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  let response = new APIRsponseClassListModel();
+  let response = new APIResponseClassListModel();
 
   Class.findAll('userId = :userId', {':userId' : data.userId}, 10, function(err, classList) {
 
@@ -72,3 +72,22 @@ module.exports.getClassDetail = (event, context, callback) => {
     callback(null, response);
   })
 };
+
+module.exports.getAllClassList = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  let response = new APIResponseClassListModel();
+
+  Class.findAll('', '', 20, function(err, classList) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind({classList}, response);
+    callback(null, response);
+  })
+};
+

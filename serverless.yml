@@ -93,3 +93,13 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  getAllClassList:
+    handler: class/handler.getAllClassList
+    events:
+      - http:
+          path: getAllClassList
+          method: post
+          cors: true
+          integration: lambda
+
