@@ -2,7 +2,7 @@
 const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
-const APIResponseClassModel = require('../apiResponseModel/APIRsponseClassModel');
+const APIResponseClassModel = require('../apiResponseModel/APIResponseClassModel');
 const APIResponseClassListModel = require('../apiResponseModel/APIResponseClassListModel');
 const Utilities = require('../common/Utilities');
 
@@ -59,7 +59,7 @@ module.exports.getClassDetail = (event, context, callback) => {
   const data = event.body;
   const classId = event.path.id;
 
-  let response = new APIRsponseClassModel();
+  let response = new APIResponseClassModel();
 
   Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
 
@@ -79,7 +79,7 @@ module.exports.getAllClassList = (event, context, callback) => {
 
   let response = new APIResponseClassListModel();
 
-  Class.findAll('', '', 20, function(err, classList) {
+  Class.findAll(null, null, 20, function(err, classList) {
 
     if (err) {
       callback(err, null);
