@@ -13,6 +13,7 @@ class APIResponseClassModel extends APIResponseBaseModel {
       this.fee = '';
       this.classId = '';
       this.userId = '';
+      this.chargeType = '';
     }
 }
 
