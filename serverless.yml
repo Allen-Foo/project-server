@@ -76,6 +76,15 @@ functions:
           cors: true
           integration: lambda
 
+  updateClass:
+    handler: class/handler.updateClass
+    events:
+      - http:
+          path: updateClass/{id}
+          method: post
+          cors: true
+          integration: lambda
+
   getClassList:
     handler: class/handler.getClassList
     events:
