@@ -135,13 +135,15 @@ module.exports.searchClassList = (event, context, callback) => {
     let exp = [];
     let expressionValue = {};
     for (var obj in data) {
-      if (obj == 'address'){
+      if (obj == 'address' && data[obj]){
         exp.push(`contains(address.formatted_address, :${obj})`);
-      } else {
-        exp.push(`contains(${obj}, :${obj})`);
+        expressionValue[":"+obj] = data[obj];
+      } else if (obj == 'keyword' && data[obj]){
+        exp.push(`(contains(className, :className) or contains(category, :category) or contains(skill, :skill))`);
+        expressionValue[':className'] = data[obj];
+        expressionValue[':category'] = data[obj];
+        expressionValue[':skill'] = data[obj];
       }
-      expressionValue[":"+obj] = data[obj];
-     
     }
     var expression = exp.join(' and ')
     console.log("expression ", expression);
