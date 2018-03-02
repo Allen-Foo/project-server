@@ -112,3 +112,12 @@ functions:
           cors: true
           integration: lambda
 
+  searchClassList:
+    handler: class/handler.searchClassList
+    events:
+      - http:
+          path: searchClassList
+          method: post
+          cors: true
+          integration: lambda
+

@@ -126,3 +126,47 @@ module.exports.getAllClassList = (event, context, callback) => {
   })
 };
 
+module.exports.searchClassList = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+  let response = new APIResponseClassListModel();
+
+  if (data) {
+    let exp = [];
+    let expressionValue = {};
+    for (var obj in data) {
+      if (obj == 'address'){
+        exp.push(`contains(address.formatted_address, :${obj})`);
+      } else {
+        exp.push(`contains(${obj}, :${obj})`);
+      }
+      expressionValue[":"+obj] = data[obj];
+     
+    }
+    var expression = exp.join(' and ')
+    console.log("expression ", expression);
+    console.log("expressionValue ", expressionValue);
+    Class.findAll(expression, expressionValue, 20, function(err, classList) {
+
+      if (err) {
+        callback(err, null);
+        return;
+      }
+      response.statusCode = ServerConstant.API_CODE_OK;
+      Utilities.bind({classList}, response);
+      callback(null, response);
+    })
+  } else {
+
+    Class.findAll(null, null, 20, function(err, classList) {
+
+      if (err) {
+        callback(err, null);
+        return;
+      }
+      response.statusCode = ServerConstant.API_CODE_OK;
+      Utilities.bind({classList}, response);
+      callback(null, response);
+    })
+  }
+};

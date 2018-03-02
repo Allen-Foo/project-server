@@ -87,9 +87,6 @@ class Entity {
             this.keepFindAll(params, arr, numberOfResult, callback);
           }
           else {
-            if (arr.length == 0) {
-              arr = null;
-            }
             arr = arr.slice(0, numberOfResult);
             callback(null, arr);
           }
@@ -116,9 +113,6 @@ class Entity {
             this.keepFindAll(params, arr, numberOfResult, callback);
           }
           else {
-            if (arr.length == 0) {
-              arr = null;
-            }
             arr = arr.slice(0, numberOfResult);
             callback(null, arr);
           }
@@ -153,8 +147,6 @@ class Entity {
       }
     }.bind(this));
   }
-
-
 }
 
 module.exports = Entity;
