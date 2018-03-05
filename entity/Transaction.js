@@ -3,7 +3,7 @@ var Entity = require("./Entity");
 class Transaction extends Entity {
   constructor() {
     // Input tableName
-    super('transaction');
+    super('transaction', 'transactionId');
     // Create All table attribute
     this.userId = 'null';
     this.lessonId = 'null';

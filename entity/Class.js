@@ -2,8 +2,8 @@ var Entity = require("./Entity");
 
 class Class extends Entity {
   constructor() {
-    // Input tableName
-    super('class');
+    // Input tableName, hashkey
+    super('class', 'classId');
     // Create All table attribute
     this.category = 'null';
     this.skill = 'null';

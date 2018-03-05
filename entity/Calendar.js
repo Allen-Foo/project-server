@@ -3,7 +3,7 @@ var Entity = require("./Entity");
 class Calendar extends Entity {
   constructor() {
     // Input tableName
-    super('calendar');
+    super('calendar', 'calendarId');
     // Create All table attribute
     this.userId = 'null';
     this.lessonId = 'null';

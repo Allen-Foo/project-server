@@ -3,8 +3,9 @@ const documentClient = new AWS.DynamoDB.DocumentClient({region: 'us-east-1'});
 const ServerConstant = require("../common/ServerConstant");
 
 class Entity {
-  constructor(tableName) {
+  constructor(tableName, hashkey) {
     this.tableName = tableName;
+    this.hashkey = hashkey;
     Object.defineProperty(this, 'tableName', {enumerable: false});
   }
 
@@ -147,6 +148,27 @@ class Entity {
       }
     }.bind(this));
   }
+
+  delete(callback) {
+    var params = {
+      TableName : this.tableName,
+      Key: {
+        [this.hashkey]: this[this.hashkey],
+      }
+    };
+
+    var documentClient = new AWS.DynamoDB.DocumentClient();
+
+    documentClient.delete(params, function(err, data) {
+      if(err) {
+        console.log(err);
+        callback(err, null);
+      } else {
+        callback(null, this);
+      }
+    }.bind(this));
+  }
+
 }
 
 module.exports = Entity;
