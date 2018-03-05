@@ -85,6 +85,15 @@ functions:
           cors: true
           integration: lambda
 
+  deleteClass:
+    handler: class/handler.deleteClass
+    events:
+      - http:
+          path: deleteClass/{id}
+          method: post
+          cors: true
+          integration: lambda
+
   getClassList:
     handler: class/handler.getClassList
     events:
