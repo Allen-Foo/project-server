@@ -214,8 +214,12 @@ module.exports.giveComment = (event, context, callback) => {
       return;
     }
 
-    classes.comments.push(data.comment);
-    console.warn('data', data)
+    classes.comments.push({
+      content: data.comment,
+      createdAt: Utilities.getCurrentTime(),
+      userId: data.userId
+    });
+    classes.updatedAt = Utilities.getCurrentTime();
     classes.saveOrUpdate(function(error, res) {
       if (error) {
         callback(error, null);
