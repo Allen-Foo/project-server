@@ -16,6 +16,8 @@ class Class extends Entity {
     this.userId = 'null';
     this.fee = 'null';
     this.chargeType = 'null';
+    this.comments = [];
+    this.rating = 'null';
   }
 }
 

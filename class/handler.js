@@ -122,7 +122,7 @@ module.exports.deleteClass = (event, context, callback) => {
       return;
     }
 
-    console.warn('classes', classes)
+    // console.warn('classes', classes)
 
     classes.delete(function(error, res) {
       if (error) {
@@ -199,4 +199,31 @@ module.exports.searchClassList = (event, context, callback) => {
       callback(null, response);
     })
   }
+};
+
+module.exports.giveComment = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+  const classId = event.path.id;
+  let response = new APIResponseClassModel();
+
+  Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+
+    classes.comments.push(data.comment);
+    console.warn('data', data)
+    classes.saveOrUpdate(function(error, res) {
+      if (error) {
+        callback(error, null);
+        return;
+      }
+      response.statusCode = ServerConstant.API_CODE_OK;
+      Utilities.bind(res, response);
+      callback(null, response);
+    });
+  })
 };

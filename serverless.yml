@@ -130,3 +130,12 @@ functions:
           cors: true
           integration: lambda
 
+  giveComment:
+    handler: class/handler.giveComment
+    events:
+      - http:
+          path: giveComment/{id}
+          method: post
+          cors: true
+          integration: lambda
+
