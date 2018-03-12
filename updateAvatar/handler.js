@@ -3,7 +3,7 @@ const s3 = new AWS.S3();
 var Utilities = require('../common/Utilities');
 const ServerConstant = require("../common/ServerConstant");
 const User = require('../entity/User');
-const APIResponseRegisterModel = require('../apiResponseModel/APIResponseRegisterModel');
+const ApiResponseUserModel = require('../apiResponseModel/ApiResponseUserModel');
 
 module.exports.updateAvatar = (event, context, callback) => {
   // get data from the body of event
@@ -14,7 +14,7 @@ module.exports.updateAvatar = (event, context, callback) => {
       callback(err, null);
       return;
     }
-  	var response = new APIResponseRegisterModel();
+  	var response = new ApiResponseUserModel();
     // callback(null, result);
     console.log('s3 result', result)
     // update dynamoDb

@@ -2,14 +2,14 @@
 const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const User = require('../entity/User');
-const APIResponseRegisterModel = require('../apiResponseModel/APIResponseRegisterModel');
+const ApiResponseUserModel = require('../apiResponseModel/ApiResponseUserModel');
 const Utilities = require('../common/Utilities');
 
 module.exports.register = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  var response = new APIResponseRegisterModel();
+  var response = new ApiResponseUserModel();
 
   // check awsId valid
   if (!data.awsId) {

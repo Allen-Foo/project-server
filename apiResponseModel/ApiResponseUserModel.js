@@ -1,6 +1,6 @@
 var APIResponseBaseModel = require("./APIResponseBaseModel");
 
-class APIResponseRegisterModel extends APIResponseBaseModel {
+class ApiResponseUserModel extends APIResponseBaseModel {
     constructor(statusCode) {
       super();
       this.email = '';
@@ -17,8 +17,8 @@ class APIResponseRegisterModel extends APIResponseBaseModel {
       this.googleId = '';
       this.facebookId = '';
       this.avatarUrl = '';
+      this.bookmark = [];
     }
-
 }
 
-module.exports = APIResponseRegisterModel;
+module.exports = ApiResponseUserModel;
