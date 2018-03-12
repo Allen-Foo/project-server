@@ -67,6 +67,15 @@ functions:
           cors: true
           integration: lambda
 
+  addToBookmark:
+    handler: history/handler.addToBookmark
+    events:
+      - http:
+          path: addToBookmark/{id}
+          method: post
+          cors: true
+          integration: lambda
+
   createClass:
     handler: class/handler.createClass
     events:

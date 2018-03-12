@@ -23,6 +23,7 @@ class User extends Entity {
     this.googleId = 'null';
     this.facebookId = 'null';
     this.avatarUrl = 'null';
+    this.bookmark = [];
   }
 }
 
