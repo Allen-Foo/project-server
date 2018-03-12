@@ -76,6 +76,15 @@ functions:
           cors: true
           integration: lambda
 
+  removeFromBookmark:
+    handler: history/handler.removeFromBookmark
+    events:
+      - http:
+          path: removeFromBookmark/{id}
+          method: post
+          cors: true
+          integration: lambda
+          
   createClass:
     handler: class/handler.createClass
     events:
