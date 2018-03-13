@@ -14,6 +14,7 @@ class APIResponseClassModel extends APIResponseBaseModel {
       this.classId = '';
       this.userId = '';
       this.chargeType = '';
+      this.rating = 'null';
       this.comments = [];
     }
 }

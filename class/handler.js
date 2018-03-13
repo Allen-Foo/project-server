@@ -2,6 +2,7 @@
 const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
+const User = require('../entity/User');
 const APIResponseClassModel = require('../apiResponseModel/APIResponseClassModel');
 const APIResponseClassListModel = require('../apiResponseModel/APIResponseClassListModel');
 const Utilities = require('../common/Utilities');
@@ -97,15 +98,49 @@ module.exports.getClassDetail = (event, context, callback) => {
   let response = new APIResponseClassModel();
 
   Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
-
     if (err) {
       callback(err, null);
       return;
     }
-    response.statusCode = ServerConstant.API_CODE_OK;
-    Utilities.bind(classes, response);
-    callback(null, response);
-  })
+        console.log (classes);
+    var comments = classes.comments;
+    var userIds = [];
+    for (var key in comments){
+      userIds.push(comments[key].userId);
+    }
+    var expressionAttibuteValues = {};
+    var index = 0;
+    userIds.forEach(function(value) {
+      index++;
+      var titleKey = ":userId"+index;
+      expressionAttibuteValues[titleKey.toString()] = value;
+    });
+
+    console.log (expressionAttibuteValues);
+    var filterExpression = 'userId IN (' + Object.keys(expressionAttibuteValues).toString() + ')';
+
+    User.findAll(filterExpression, expressionAttibuteValues, 20, function(err, users) {
+
+      var tmp = classes;
+
+      for (var commentKey in tmp.comments) {
+        for (var userKey in users) {
+          if (users[userKey].userId == tmp.comments[commentKey].userId) {
+            tmp.comments[commentKey].user = users[userKey];
+            delete tmp.comments[commentKey].userId
+            break;
+          }
+        } 
+      }
+
+      // console.log(users);
+      response.statusCode = ServerConstant.API_CODE_OK;
+      Utilities.bind(tmp, response);
+      callback(null, response);
+      return;
+    });
+
+  });
 };
 
 module.exports.deleteClass = (event, context, callback) => {
