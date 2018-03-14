@@ -102,26 +102,30 @@ module.exports.getClassDetail = (event, context, callback) => {
       callback(err, null);
       return;
     }
-        console.log (classes);
+    // console.log (classes);
     var comments = classes.comments;
     var userIds = [];
+    var averageRating = 0;
+    var total = 0;
+
     for (var key in comments){
       userIds.push(comments[key].userId);
+      total += comments[key].content.starCount
     }
-    var expressionAttibuteValues = {};
-    var index = 0;
-    userIds.forEach(function(value) {
-      index++;
-      var titleKey = ":userId"+index;
-      expressionAttibuteValues[titleKey.toString()] = value;
-    });
 
-    console.log (expressionAttibuteValues);
+    averageRating = total / comments.length;
+    console.warn('averageRating',averageRating)
+
+    var expressionAttibuteValues = {};
+    userIds.forEach((value, index) => expressionAttibuteValues[":userId" + index] = value);
+
+    // console.log (expressionAttibuteValues);
     var filterExpression = 'userId IN (' + Object.keys(expressionAttibuteValues).toString() + ')';
 
     User.findAll(filterExpression, expressionAttibuteValues, 20, function(err, users) {
 
       var tmp = classes;
+      tmp.rating = averageRating 
 
       for (var commentKey in tmp.comments) {
         for (var userKey in users) {
