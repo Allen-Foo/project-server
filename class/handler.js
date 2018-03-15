@@ -240,6 +240,7 @@ module.exports.searchClassList = (event, context, callback) => {
 module.exports.giveComment = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
+  let newComment = data.comment;
   const classId = event.path.id;
   let response = new APIResponseClassModel();
 
@@ -257,25 +258,31 @@ module.exports.giveComment = (event, context, callback) => {
       }
       let comments = classes.comments || []
       comments.push({
-        rating: data.comment.rating,
-        content: data.comment.content,
+        rating: newComment.rating,
+        content: newComment.content,
         createdAt: Utilities.getCurrentTime(),
         user: user
       });
 
       // calculate the average ratings
-      var totalRatings = new Array(4).fill(0);
+      let totalRatings = {};
+      Object.keys(newComment.rating).forEach(key => totalRatings[key] = 0)
 
       console.log('comments', comments)
 
       comments.forEach((comment) => {
-        Object.keys(data.comment.rating).forEach((key, index) => {
+        Object.keys(comment.rating).forEach((key, index) => {
           let tempRating = comment.rating ? comment.rating[key] : 0
-          totalRatings[index] += tempRating + data.comment.rating[key]
+          totalRatings[key] += tempRating
         })
       })
 
-      var averageRatings = totalRatings.map(rating => rating / classes.comments.length + 1)
+      let averageRatings = {}
+      console.log('totalRatings', totalRatings)
+
+
+      Object.keys(totalRatings).forEach(key => averageRatings[key] = totalRatings[key] / comments.length )
+      console.log('averageRatings', averageRatings)
 
       classes.rating = averageRatings
       classes.comments = comments;
