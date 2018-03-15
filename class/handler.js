@@ -98,53 +98,15 @@ module.exports.getClassDetail = (event, context, callback) => {
   let response = new APIResponseClassModel();
 
   Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
+
     if (err) {
       callback(err, null);
       return;
     }
-    // console.log (classes);
-    var comments = classes.comments;
-    var userIds = [];
-    var averageRating = 0;
-    var total = 0;
-
-    for (var key in comments){
-      userIds.push(comments[key].userId);
-      total += comments[key].content.starCount
-    }
-
-    averageRating = total / comments.length;
-    console.warn('averageRating',averageRating)
-
-    var expressionAttibuteValues = {};
-    userIds.forEach((value, index) => expressionAttibuteValues[":userId" + index] = value);
-
-    // console.log (expressionAttibuteValues);
-    var filterExpression = 'userId IN (' + Object.keys(expressionAttibuteValues).toString() + ')';
-
-    User.findAll(filterExpression, expressionAttibuteValues, 20, function(err, users) {
-
-      var tmp = classes;
-      tmp.rating = averageRating 
-
-      for (var commentKey in tmp.comments) {
-        for (var userKey in users) {
-          if (users[userKey].userId == tmp.comments[commentKey].userId) {
-            tmp.comments[commentKey].user = users[userKey];
-            delete tmp.comments[commentKey].userId
-            break;
-          }
-        } 
-      }
-
-      // console.log(users);
-      response.statusCode = ServerConstant.API_CODE_OK;
-      Utilities.bind(tmp, response);
-      callback(null, response);
-      return;
-    });
-
-  });
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind(classes, response);
+    callback(null, response);
+  })
 };
 
 module.exports.deleteClass = (event, context, callback) => {
@@ -253,20 +215,46 @@ module.exports.giveComment = (event, context, callback) => {
       return;
     }
 
-    classes.comments.push({
-      content: data.comment,
-      createdAt: Utilities.getCurrentTime(),
-      userId: data.userId
-    });
-    classes.updatedAt = Utilities.getCurrentTime();
-    classes.saveOrUpdate(function(error, res) {
-      if (error) {
-        callback(error, null);
+    User.findFirst('userId = :userId', {':userId' : data.userId}, function(err, user) {
+      if (err) {
+        callback(err, null);
         return;
       }
-      response.statusCode = ServerConstant.API_CODE_OK;
-      Utilities.bind(res, response);
-      callback(null, response);
+      let comments = classes.comments || []
+      comments.push({
+        rating: data.comment.rating,
+        content: data.comment.content,
+        createdAt: Utilities.getCurrentTime(),
+        user: user
+      });
+
+      // calculate the average ratings
+      var totalRatings = new Array(4).fill(0);
+
+      console.log('comments', comments)
+
+      comments.forEach((comment) => {
+        Object.keys(data.comment.rating).forEach((key, index) => {
+          let tempRating = comment.rating ? comment.rating[key] : 0
+          totalRatings[index] += tempRating + data.comment.rating[key]
+        })
+      })
+
+      var averageRatings = totalRatings.map(rating => rating / classes.comments.length + 1)
+
+      classes.rating = averageRatings
+      classes.comments = comments;
+
+      classes.updatedAt = Utilities.getCurrentTime();
+      classes.saveOrUpdate(function(error, res) {
+        if (error) {
+          callback(error, null);
+          return;
+        }
+        response.statusCode = ServerConstant.API_CODE_OK;
+        Utilities.bind(res, response);
+        callback(null, response);
+      });
     });
   })
 };
