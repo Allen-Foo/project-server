@@ -121,6 +121,69 @@ class Entity {
     }.bind(this));
   }
 
+  // Return All row from table by Order
+  static findAllByOrder(filterExpression, expressionAttributeValues, numberOfResult, sortIndexName, isAscending, callback) {
+    expressionAttributeValues[':hashkey'] = new this().hashkey;
+    var params = {
+      TableName: new this().tableName,
+      IndexName: 'hashkey-' + sortIndexName + '-index',
+      KeyConditionExpression: 'hashkey = :hashkey',
+      FilterExpression: filterExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ScanIndexForward: isAscending,
+    };
+
+    documentClient.query(params, function(err, data) {
+      if(err) {
+        console.log(err);
+        callback(err, null);
+      } else {
+          var arr = [];
+          var items = data.Items;
+          for (var i in items) {
+            var a = new this();
+            Object.assign(a, items[i]);
+            arr.push(a);
+          }
+
+          if (data.LastEvaluatedKey && arr.length < numberOfResult) {
+            params.ExclusiveStartKey = data.LastEvaluatedKey;
+            this.keepFindAllbyOrder(params, arr, numberOfResult, callback);
+          }
+          else {
+            arr = arr.slice(0, numberOfResult);
+            callback(null, arr);
+          }
+      }
+    }.bind(this));
+  }
+
+  static keepFindAllbyOrder(params, arr, numberOfResult, callback) {
+    documentClient.query(params, function(err, data) {
+      if(err) {
+        console.log(err);
+        callback(err, null);
+      } else {
+          var arr = [];
+          var items = data.Items;
+          for (var i in items) {
+            var a = new this();
+            Object.assign(a, items[i]);
+            arr.push(a);
+          }
+
+          if (data.LastEvaluatedKey && arr.length < numberOfResult) {
+            params.ExclusiveStartKey = data.LastEvaluatedKey;
+            this.keepFindAll(params, arr, numberOfResult, callback);
+          }
+          else {
+            arr = arr.slice(0, numberOfResult);
+            callback(null, arr);
+          }
+      }
+    }.bind(this));
+  }
+
   // Add a row
   saveOrUpdate(callback) {
     // Add item
