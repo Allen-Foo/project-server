@@ -14,7 +14,7 @@ class Class extends Entity {
     this.classId = 'null';
     this.photoList = 'null';
     this.userId = 'null';
-    this.fee = 'null';
+    this.fee = 0;
     this.chargeType = 'null';
     this.comments = [];
     this.rating = 'null';

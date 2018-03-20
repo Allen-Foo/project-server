@@ -207,11 +207,24 @@ module.exports.searchClassList = (event, context, callback) => {
         expressionValue[':className'] = data[obj];
         expressionValue[':category'] = data[obj];
         expressionValue[':skill'] = data[obj];
+      } else if (obj == 'advancedSearch' && data[obj]) {
+        for (var key in data.advancedSearch) {
+          if (data.advancedSearch[key] && key != "chargeType") {
+            if (key == 'searchPrice') {
+              exp.push(`fee <= :${key}`);
+              expressionValue[":"+key] = data.advancedSearch[key];
+            }
+            else {
+              exp.push(`contains(${key}, :${key})`);
+              expressionValue[":"+key] = data.advancedSearch[key];
+            }
+          }
+        }
       }
     }
     var expression = exp.join(' and ')
-    console.log("expression ", expression);
-    console.log("expressionValue ", expressionValue);
+    // console.log("expression ", expression);
+    // console.log("expressionValue ", expressionValue);
     Class.findAll(expression, expressionValue, 20, function(err, classList) {
 
       if (err) {
