@@ -125,16 +125,16 @@ module.exports.getFavouriteClassList = (event, context, callback) => {
     var expressionAttibuteValues = {};
     ids.forEach((value, index) => expressionAttibuteValues[":classId" + index] = value);
 
-    console.log('expressionAttibuteValues', expressionAttibuteValues);
+    // console.log('expressionAttibuteValues', expressionAttibuteValues);
     var filterExpression = `classId IN (${Object.keys(expressionAttibuteValues).toString()})`;
 
-    console.log('filterExpression', filterExpression)
+    // console.log('filterExpression', filterExpression)
 
     Class.findAll(filterExpression, expressionAttibuteValues, 20, function(err, classList) {
       if (err) {
         callback(err, null);
       } else {
-        console.warn('classList', classList)
+        //console.warn('classList', classList)
         classList.forEach(cls => cls.liked = true)
         response.statusCode = ServerConstant.API_CODE_OK;
         Utilities.bind({classList}, response);
@@ -342,9 +342,9 @@ module.exports.giveComment = (event, context, callback) => {
 
       Object.keys(totalRatings).forEach(key => averageRatings[key] = totalRatings[key] / comments.length )
       Object.keys(averageRatings).forEach(key => totalNumberOfRatings += (averageRatings[key] / 4))
-      console.log('averageRatings', averageRatings)
-      console.log('totalRatings', totalRatings)
-      console.log('comments.length', comments.length)
+      // console.log('averageRatings', averageRatings)
+      // console.log('totalRatings', totalRatings)
+      // console.log('comments.length', comments.length)
 
       classes.totalRatings = totalNumberOfRatings
       classes.totalComments = comments.length
