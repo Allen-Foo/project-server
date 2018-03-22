@@ -18,6 +18,8 @@ class Class extends Entity {
     this.chargeType = 'null';
     this.comments = [];
     this.rating = 'null';
+    this.totalRatings = 0;
+    this.totalComments = 0;
   }
 }
 

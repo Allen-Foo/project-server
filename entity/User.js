@@ -24,6 +24,7 @@ class User extends Entity {
     this.facebookId = 'null';
     this.avatarUrl = 'null';
     this.bookmark = [];
+    this.totalRatings = 0;
   }
 }
 

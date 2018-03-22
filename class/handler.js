@@ -194,7 +194,6 @@ module.exports.searchClassList = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
   let response = new APIResponseClassListModel();
-
   if (data) {
     let exp = [];
     let expressionValue = {};
@@ -209,10 +208,20 @@ module.exports.searchClassList = (event, context, callback) => {
         expressionValue[':skill'] = data[obj];
       } else if (obj == 'advancedSearch' && data[obj]) {
         for (var key in data.advancedSearch) {
-          if (data.advancedSearch[key] && key != "chargeType") {
+          if (data.advancedSearch[key] && key != "chargeType" && key != "sortType" && key != "isAscending") {
             if (key == 'searchPrice') {
               exp.push(`fee <= :${key}`);
               expressionValue[":"+key] = data.advancedSearch[key];
+            }
+            else if (key == 'address' && data.advancedSearch[key]) {
+                exp.push(`contains(address.formatted_address, :${key})`);
+                expressionValue[":"+key] = data.advancedSearch[key];
+            } 
+            else if (key == 'keyword' && data.advancedSearch[key]){
+              exp.push(`(contains(className, :className) or contains(category, :category) or contains(skill, :skill))`);
+              expressionValue[':className'] = data.advancedSearch[key];
+              expressionValue[':category'] = data.advancedSearch[key];
+              expressionValue[':skill'] = data.advancedSearch[key];
             }
             else {
               exp.push(`contains(${key}, :${key})`);
@@ -222,19 +231,55 @@ module.exports.searchClassList = (event, context, callback) => {
         }
       }
     }
-    var expression = exp.join(' and ')
-    // console.log("expression ", expression);
-    // console.log("expressionValue ", expressionValue);
-    Class.findAll(expression, expressionValue, 20, function(err, classList) {
 
-      if (err) {
-        callback(err, null);
-        return;
+    var expression = exp.join(' and ')
+    //
+    if (exp.length === 0) {
+      expression = null;
+      expressionValue = null;
+    }
+    //called by 
+    if (data.advancedSearch) {
+      // 
+      if (data.advancedSearch.sortType) {
+        // console.log (data.advancedSearch.isAscending);
+        Class.findAllByOrder(expression, expressionValue, 20, data.advancedSearch.sortType, data.advancedSearch.isAscending, function(err, classList) {
+
+          if (err) {
+            callback(err, null);
+            return;
+          }
+          response.statusCode = ServerConstant.API_CODE_OK;
+          Utilities.bind({classList}, response);
+          callback(null, response);
+        })
       }
-      response.statusCode = ServerConstant.API_CODE_OK;
-      Utilities.bind({classList}, response);
-      callback(null, response);
-    })
+      // sdfl
+      else {
+        Class.findAll(expression, expressionValue, 20, function(err, classList) {
+
+          if (err) {
+            callback(err, null);
+            return;
+          }
+          response.statusCode = ServerConstant.API_CODE_OK;
+          Utilities.bind({classList}, response);
+          callback(null, response);
+        })
+      }
+    } else {
+      Class.findAll(expression, expressionValue, 20, function(err, classList) {
+
+        if (err) {
+          callback(err, null);
+          return;
+        }
+        response.statusCode = ServerConstant.API_CODE_OK;
+        Utilities.bind({classList}, response);
+        callback(null, response);
+      })
+    }
+    
   } else {
 
     Class.findAll(null, null, 20, function(err, classList) {
@@ -281,7 +326,7 @@ module.exports.giveComment = (event, context, callback) => {
       let totalRatings = {};
       Object.keys(newComment.rating).forEach(key => totalRatings[key] = 0)
 
-      console.log('comments', comments)
+      // console.log('comments', comments)
 
       comments.forEach((comment) => {
         Object.keys(comment.rating).forEach((key, index) => {
@@ -291,12 +336,18 @@ module.exports.giveComment = (event, context, callback) => {
       })
 
       let averageRatings = {}
-      console.log('totalRatings', totalRatings)
+      // console.log('totalRatings', totalRatings)
 
+      let totalNumberOfRatings = 0
 
       Object.keys(totalRatings).forEach(key => averageRatings[key] = totalRatings[key] / comments.length )
+      Object.keys(averageRatings).forEach(key => totalNumberOfRatings += (averageRatings[key] / 4))
       console.log('averageRatings', averageRatings)
+      console.log('totalRatings', totalRatings)
+      console.log('comments.length', comments.length)
 
+      classes.totalRatings = totalNumberOfRatings
+      classes.totalComments = comments.length
       classes.rating = averageRatings
       classes.comments = comments;
 

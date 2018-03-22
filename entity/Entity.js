@@ -70,6 +70,7 @@ class Entity {
       FilterExpression : filterExpression,
       ExpressionAttributeValues : expressionAttributeValues
     };
+    console.log(params);
     documentClient.scan(params, function(err, data) {
       if(err) {
         console.log(err);
@@ -123,16 +124,32 @@ class Entity {
 
   // Return All row from table by Order
   static findAllByOrder(filterExpression, expressionAttributeValues, numberOfResult, sortIndexName, isAscending, callback) {
+    if (expressionAttributeValues == null) {
+      expressionAttributeValues = [];
+    }
     expressionAttributeValues[':hashkey'] = new this().hashkey;
+    var keyConditionExpression = 'hashkey = :hashkey';
+    if (filterExpression != null) {
+      var tmp = filterExpression.split(' and ');
+      var index = tmp.findIndex(x => x.includes(sortIndexName));
+      if (index != -1) {
+        keyConditionExpression += ' and ' + tmp[index];
+        tmp.splice(index, 1);
+        console.log('tmp', tmp);
+        filterExpression = tmp.join(' and ');
+        console.log('filterExpression', filterExpression);
+      }
+    }
+
     var params = {
       TableName: new this().tableName,
       IndexName: 'hashkey-' + sortIndexName + '-index',
-      KeyConditionExpression: 'hashkey = :hashkey',
+      KeyConditionExpression: keyConditionExpression,
       FilterExpression: filterExpression,
       ExpressionAttributeValues: expressionAttributeValues,
       ScanIndexForward: isAscending,
     };
-
+    console.log(params);
     documentClient.query(params, function(err, data) {
       if(err) {
         console.log(err);
