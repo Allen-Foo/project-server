@@ -202,7 +202,7 @@ module.exports.searchClassList = (event, context, callback) => {
         exp.push(`contains(address.formatted_address, :${obj})`);
         expressionValue[":"+obj] = data[obj];
       } else if (obj == 'keyword' && data[obj]){
-        exp.push(`(contains(className, :className) or contains(category, :category) or contains(skill, :skill))`);
+        exp.push(`(contains(title, :className) or contains(category, :category) or contains(skill, :skill))`);
         expressionValue[':className'] = data[obj];
         expressionValue[':category'] = data[obj];
         expressionValue[':skill'] = data[obj];
