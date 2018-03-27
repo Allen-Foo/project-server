@@ -103,9 +103,18 @@ module.exports.getClassDetail = (event, context, callback) => {
       callback(err, null);
       return;
     }
+
+    User.findFirst('userId = :userId', {':userId' : classes.userId}, function(err, user) {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+    classes.user = user
     response.statusCode = ServerConstant.API_CODE_OK;
     Utilities.bind(classes, response);
     callback(null, response);
+    });
+
   })
 };
 
