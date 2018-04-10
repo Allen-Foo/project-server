@@ -78,7 +78,7 @@ module.exports.getClassList = (event, context, callback) => {
 
   let response = new APIResponseClassListModel();
 
-  Class.findAll('userId = :userId', {':userId' : data.userId}, 10, function(err, classList) {
+  Class.findAll('userId = :userId', {':userId' : data.userId}, data.lastStartKey, 20, function(err, classList) {
 
     if (err) {
       callback(err, null);
@@ -139,7 +139,7 @@ module.exports.getFavouriteClassList = (event, context, callback) => {
 
     // console.log('filterExpression', filterExpression)
 
-    Class.findAll(filterExpression, expressionAttibuteValues, 20, function(err, classList) {
+    Class.findAll(filterExpression, expressionAttibuteValues, data.lastStartKey, 20, function(err, classList) {
       if (err) {
         callback(err, null);
       } else {
@@ -187,7 +187,9 @@ module.exports.getAllClassList = (event, context, callback) => {
 
   let response = new APIResponseClassListModel();
 
-  Class.findAll(null, null, 20, function(err, classList) {
+  let lastEvaluatedKey = data && data.lastStartKey ?  {classId: data.lastStartKey} : null;
+
+  Class.findAll(null, null, lastEvaluatedKey, 10, function(err, classList) {
 
     if (err) {
       callback(err, null);
@@ -265,7 +267,7 @@ module.exports.searchClassList = (event, context, callback) => {
       }
       // sdfl
       else {
-        Class.findAll(expression, expressionValue, 20, function(err, classList) {
+        Class.findAll(expression, expressionValue, data.lastStartKey, 20, function(err, classList) {
 
           if (err) {
             callback(err, null);
@@ -277,7 +279,7 @@ module.exports.searchClassList = (event, context, callback) => {
         })
       }
     } else {
-      Class.findAll(expression, expressionValue, 20, function(err, classList) {
+      Class.findAll(expression, expressionValue, data.lastStartKey, 20, function(err, classList) {
 
         if (err) {
           callback(err, null);
@@ -291,7 +293,7 @@ module.exports.searchClassList = (event, context, callback) => {
     
   } else {
 
-    Class.findAll(null, null, 20, function(err, classList) {
+    Class.findAll(null, null, data.lastStartKey, 20, function(err, classList) {
 
       if (err) {
         callback(err, null);

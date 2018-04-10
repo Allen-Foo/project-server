@@ -166,3 +166,13 @@ functions:
           cors: true
           integration: lambda
 
+
+  applyClass:
+    handler: applyClass/handler.applyClass
+    events:
+      - http:
+          path: applyClass/{id}
+          method: post
+          cors: true
+          integration: lambda
+

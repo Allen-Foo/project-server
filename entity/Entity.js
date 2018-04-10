@@ -64,11 +64,12 @@ class Entity {
   }
 
   // Return All row from table
-  static findAll(filterExpression, expressionAttributeValues, numberOfResult, callback) {
+  static findAll(filterExpression, expressionAttributeValues, lastEvaluatedKey, numberOfResult, callback) {
     var params = {
       TableName : new this().tableName,
       FilterExpression : filterExpression,
-      ExpressionAttributeValues : expressionAttributeValues
+      ExpressionAttributeValues : expressionAttributeValues,
+      ExclusiveStartKey : lastEvaluatedKey
     };
     console.log(params);
     documentClient.scan(params, function(err, data) {
@@ -102,7 +103,6 @@ class Entity {
         console.log(err);
         callback(err, null);
       } else {
-          var arr = [];
           var items = data.Items;
           for (var i in items) {
             var a = new this();
@@ -181,7 +181,6 @@ class Entity {
         console.log(err);
         callback(err, null);
       } else {
-          var arr = [];
           var items = data.Items;
           for (var i in items) {
             var a = new this();
