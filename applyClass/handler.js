@@ -4,7 +4,8 @@ const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
 const User = require('../entity/User');
 const ApplyClass = require('../entity/ApplyClass')
-const APIResponseApplyClassModel = require('../apiResponseModel/APIResponseApplyClassModel');
+const APIResponseAppliedClassModel = require('../apiResponseModel/APIResponseAppliedClassModel');
+const APIResponseAppliedClassListModel = require('../apiResponseModel/APIResponseAppliedClassListModel');
 const Utilities = require('../common/Utilities');
 
 module.exports.applyClass = (event, context, callback) => {
@@ -12,7 +13,7 @@ module.exports.applyClass = (event, context, callback) => {
   const data = event.body;
   const classId = event.path.id;
 
-  let response = new APIResponseApplyClassModel();
+  let response = new APIResponseAppliedClassModel();
 
   if (!data.userId) {
     response.statusCode = ServerConstant.API_CODE_ACC_UNAUTHORIZED;
@@ -60,11 +61,25 @@ module.exports.applyClass = (event, context, callback) => {
           Utilities.bind(applyClass, response);
           callback(null, response);
         });
-
       });
-
     })
-
   })
+};
 
+module.exports.getAppliedClassList = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  let response = new APIResponseAppliedClassListModel();
+
+  ApplyClass.findAll('userId = :userId', {':userId' : data.userId}, data.lastStartKey, 20, function(err, appliedClassList) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind({appliedClassList}, response);
+    callback(null, response);
+  })
 };
