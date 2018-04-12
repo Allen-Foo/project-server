@@ -9,9 +9,10 @@ class Utilities {
     // A function combine a to b
     for (var b in objB) {
       if (objA[b]) {
-        if (Object.keys(objB[b]).length > 0 && typeof objB[b] != "string")
-          this.bind(objA[b], objB[b]);
-        else
+        // it seems that no need to recursivly use bind
+        // if (Object.keys(objB[b]).length > 0 && typeof objB[b] != "string")
+        //   this.bind(objA[b], objB[b]);
+        // else
           objB[b] = objA[b];
       }
     }
