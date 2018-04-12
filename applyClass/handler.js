@@ -51,6 +51,9 @@ module.exports.applyClass = (event, context, callback) => {
         newApplyClass.userName = user.username;
         newApplyClass.tutorId = classes.userId;
         newApplyClass.tutorName = classes.user.username;
+        newApplyClass.photoList = classes.photoList;
+        newApplyClass.address = classes.address;
+
         //newApplyClass.classTimeList = 
         newApplyClass.saveOrUpdate(function(err, applyClass) {
           if (err) {
