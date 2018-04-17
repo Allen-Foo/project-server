@@ -21,7 +21,7 @@ module.exports.createClass = (event, context, callback) => {
   }
 
   // check duplicate email
-  
+
   let newClass = new Class();
   Utilities.bind(data, newClass);
   newClass.createdAt = Utilities.getCurrentTime();
@@ -227,7 +227,7 @@ module.exports.searchClassList = (event, context, callback) => {
             else if (key == 'address' && data.advancedSearch[key]) {
                 exp.push(`contains(address.formatted_address, :${key})`);
                 expressionValue[":"+key] = data.advancedSearch[key];
-            } 
+            }
             else if (key == 'keyword' && data.advancedSearch[key]){
               exp.push(`(contains(className, :className) or contains(category, :category) or contains(skill, :skill))`);
               expressionValue[':className'] = data.advancedSearch[key];
@@ -249,21 +249,52 @@ module.exports.searchClassList = (event, context, callback) => {
       expression = null;
       expressionValue = null;
     }
-    //called by 
+    //called by
     if (data.advancedSearch) {
-      // 
+      //
       if (data.advancedSearch.sortType) {
-        // console.log (data.advancedSearch.isAscending);
-        Class.findAllByOrder(expression, expressionValue, 20, data.advancedSearch.sortType, data.advancedSearch.isAscending, function(err, classList) {
+        if (data.advancedSearch.sortType == 'distance') {
+          const latPerKm = 1 / 110.574;
+          const lngPerKm = 1 / 111.320 * Math.cos(lat * Math.PI/180);
 
-          if (err) {
-            callback(err, null);
-            return;
-          }
-          response.statusCode = ServerConstant.API_CODE_OK;
-          Utilities.bind({classList}, response);
-          callback(null, response);
-        })
+          const limitKm = 5;
+
+          var sumLat = lat + limitKm * latPerKm;
+          var sumLng = lng + limitKm * lngPerKm;
+
+          var diffLat = lat - limitKm * latPerKm;
+          var diffLng = lng - limitKm * lngPerKm;
+
+          expression += 'and (address.coordinate.lat BETWEEN :diffLat and :sumLat) and (address.coordinate.lng BETWEEN :diffLng and :sumLng)'
+          expressValue[":sumLat"] = sumLat;
+          expressValue[":sumLng"] = sumLng;
+          expressValue[":diffLat"] = diffLat;
+          expressValue[":diffLng"] = diffLng;
+
+          Class.findAll(expression, expressionValue, data.lastStartKey, 20, function(err, classList) {
+
+            if (err) {
+              callback(err, null);
+              return;
+            }
+            response.statusCode = ServerConstant.API_CODE_OK;
+            Utilities.bind({classList}, response);
+            callback(null, response);
+          })
+        }
+        else {
+          // console.log (data.advancedSearch.isAscending);
+          Class.findAllByOrder(expression, expressionValue, data.lastStartKey, 20, data.advancedSearch.sortType, data.advancedSearch.isAscending, function(err, classList) {
+
+            if (err) {
+              callback(err, null);
+              return;
+            }
+            response.statusCode = ServerConstant.API_CODE_OK;
+            Utilities.bind({classList}, response);
+            callback(null, response);
+          })
+        }
       }
       // sdfl
       else {
@@ -290,7 +321,7 @@ module.exports.searchClassList = (event, context, callback) => {
         callback(null, response);
       })
     }
-    
+
   } else {
 
     Class.findAll(null, null, data.lastStartKey, 20, function(err, classList) {

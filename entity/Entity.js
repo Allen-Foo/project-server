@@ -123,7 +123,7 @@ class Entity {
   }
 
   // Return All row from table by Order
-  static findAllByOrder(filterExpression, expressionAttributeValues, numberOfResult, sortIndexName, isAscending, callback) {
+  static findAllByOrder(filterExpression, expressionAttributeValues, lastEvaluatedKey, numberOfResult, sortIndexName, isAscending, callback) {
     if (expressionAttributeValues == null) {
       expressionAttributeValues = [];
     }
@@ -147,6 +147,7 @@ class Entity {
       KeyConditionExpression: keyConditionExpression,
       FilterExpression: filterExpression,
       ExpressionAttributeValues: expressionAttributeValues,
+      ExclusiveStartKey : lastEvaluatedKey,
       ScanIndexForward: isAscending,
     };
     console.log(params);
