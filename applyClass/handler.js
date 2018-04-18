@@ -53,6 +53,8 @@ module.exports.applyClass = (event, context, callback) => {
         newApplyClass.tutorName = classes.user.username;
         newApplyClass.photoList = classes.photoList;
         newApplyClass.address = classes.address;
+        newApplyClass.time = classes.time;
+        newApplyClass.title = classes.title;
 
         //newApplyClass.classTimeList = 
         newApplyClass.saveOrUpdate(function(err, applyClass) {

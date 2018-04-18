@@ -17,6 +17,8 @@ class ApplyClass extends Entity {
     this.photoList = 'null';
     this.address = 'null';
     this.classTimeList = [];
+    this.time = 'null';
+    this.title = 'null';
   }
 }
 

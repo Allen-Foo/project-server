@@ -16,6 +16,8 @@ class APIResponseApplyClassModel extends APIResponseBaseModel {
       this.address = 'null';
       this.classTimeList = [];
       this.user = {};
+      this.time = {};
+      this.title = {};
     }
 }
 
