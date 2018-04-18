@@ -8,6 +8,7 @@ class APIResponseClassModel extends APIResponseBaseModel {
       this.skill = '';
       this.time = '';
       this.address = '';
+      this.phone = '';
       this.description = '';
       this.photoList = '';
       this.fee = 0;

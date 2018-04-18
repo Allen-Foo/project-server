@@ -10,6 +10,7 @@ class Class extends Entity {
     this.title = 'null';
     this.time = 'null';
     this.address = 'null';
+    this.phone = '';
     this.description = 'null';
     this.classId = 'null';
     this.photoList = 'null';

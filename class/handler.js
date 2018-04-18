@@ -26,6 +26,7 @@ module.exports.createClass = (event, context, callback) => {
   Utilities.bind(data, newClass);
   newClass.createdAt = Utilities.getCurrentTime();
   newClass.classId = uuidv4();
+  newClass.phone = data.contactNumber;
   newClass.saveOrUpdate(function(err, res) {
     if (err) {
       callback(err, null);
