@@ -21,12 +21,10 @@ module.exports.createClass = (event, context, callback) => {
   }
 
   // check duplicate email
-
   let newClass = new Class();
   Utilities.bind(data, newClass);
   newClass.createdAt = Utilities.getCurrentTime();
   newClass.classId = uuidv4();
-  newClass.phone = data.contactNumber;
   newClass.saveOrUpdate(function(err, res) {
     if (err) {
       callback(err, null);
@@ -78,8 +76,9 @@ module.exports.getClassList = (event, context, callback) => {
   const data = event.body;
 
   let response = new APIResponseClassListModel();
+  let lastEvaluatedKey = data && data.lastStartKey ?  {classId: data.lastStartKey} : null;
 
-  Class.findAll('userId = :userId', {':userId' : data.userId}, data.lastStartKey, 20, function(err, classList) {
+  Class.findAll('userId = :userId', {':userId' : data.userId}, lastEvaluatedKey, 6, function(err, classList) {
 
     if (err) {
       callback(err, null);
