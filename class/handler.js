@@ -77,6 +77,7 @@ module.exports.getClassList = (event, context, callback) => {
 
   let response = new APIResponseClassListModel();
   let lastEvaluatedKey = data && data.lastStartKey ?  {classId: data.lastStartKey} : null;
+  let isLastClass = false;
 
   Class.findAll('userId = :userId', {':userId' : data.userId}, lastEvaluatedKey, 6, function(err, classList) {
 
@@ -84,8 +85,12 @@ module.exports.getClassList = (event, context, callback) => {
       callback(err, null);
       return;
     }
+    if (classList.length < 6){
+      isLastClass = true
+    }
     response.statusCode = ServerConstant.API_CODE_OK;
     Utilities.bind({classList}, response);
+    response.isLastClass = isLastClass;
     callback(null, response);
   })
 };
@@ -188,6 +193,7 @@ module.exports.getAllClassList = (event, context, callback) => {
   let response = new APIResponseClassListModel();
 
   let lastEvaluatedKey = data && data.lastStartKey ?  {classId: data.lastStartKey} : null;
+  let isLastClass = false;
 
   Class.findAll(null, null, lastEvaluatedKey, 10, function(err, classList) {
 
@@ -195,8 +201,12 @@ module.exports.getAllClassList = (event, context, callback) => {
       callback(err, null);
       return;
     }
+    if (classList.length < 10){
+      isLastClass = true
+    }
     response.statusCode = ServerConstant.API_CODE_OK;
     Utilities.bind({classList}, response);
+    response.isLastClass = isLastClass;
     callback(null, response);
   })
 };
