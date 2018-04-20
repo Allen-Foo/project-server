@@ -233,13 +233,28 @@ module.exports.getAllClassList = (event, context, callback) => {
   })
 };
 
+function getResponse(expression, expressionValue, data, response, callback) {
+  Class.findAll(expression, expressionValue, data.lastStartKey, 20, function(err, classList) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind({classList}, response);
+    callback(null, response);
+  })
+}
+
 module.exports.searchClassList = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
   let response = new APIResponseClassListModel();
+  let expression = null;
+  let expressionValue = null;
   if (data) {
     let exp = [];
-    let expressionValue = {};
+    expressionValue = {};
     for (var obj in data) {
       if (obj == 'address' && data[obj]){
         exp.push(`contains(address.formatted_address, :${obj})`);
@@ -275,8 +290,8 @@ module.exports.searchClassList = (event, context, callback) => {
       }
     }
 
-    var expression = exp.join(' and ')
-    //
+    expression = exp.join(' and ')
+
     if (exp.length === 0) {
       expression = null;
       expressionValue = null;
@@ -303,16 +318,7 @@ module.exports.searchClassList = (event, context, callback) => {
           expressValue[":diffLat"] = diffLat;
           expressValue[":diffLng"] = diffLng;
 
-          Class.findAll(expression, expressionValue, data.lastStartKey, 20, function(err, classList) {
-
-            if (err) {
-              callback(err, null);
-              return;
-            }
-            response.statusCode = ServerConstant.API_CODE_OK;
-            Utilities.bind({classList}, response);
-            callback(null, response);
-          })
+          getResponse(expression, expressionValue, data, response, callback)
         }
         else {
           // console.log (data.advancedSearch.isAscending);
@@ -328,44 +334,14 @@ module.exports.searchClassList = (event, context, callback) => {
           })
         }
       }
-      // sdfl
       else {
-        Class.findAll(expression, expressionValue, data.lastStartKey, 20, function(err, classList) {
-
-          if (err) {
-            callback(err, null);
-            return;
-          }
-          response.statusCode = ServerConstant.API_CODE_OK;
-          Utilities.bind({classList}, response);
-          callback(null, response);
-        })
+        getResponse(expression, expressionValue, data, response, callback)
       }
     } else {
-      Class.findAll(expression, expressionValue, data.lastStartKey, 20, function(err, classList) {
-
-        if (err) {
-          callback(err, null);
-          return;
-        }
-        response.statusCode = ServerConstant.API_CODE_OK;
-        Utilities.bind({classList}, response);
-        callback(null, response);
-      })
+      getResponse(expression, expressionValue, data, response, callback)
     }
-
   } else {
-
-    Class.findAll(null, null, data.lastStartKey, 20, function(err, classList) {
-
-      if (err) {
-        callback(err, null);
-        return;
-      }
-      response.statusCode = ServerConstant.API_CODE_OK;
-      Utilities.bind({classList}, response);
-      callback(null, response);
-    })
+    getResponse(expression, expressionValue, data, response, callback)
   }
 };
 
