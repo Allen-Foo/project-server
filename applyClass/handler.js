@@ -27,15 +27,14 @@ module.exports.applyClass = (event, context, callback) => {
       callback(err, null);
       return;
     }
-
+    //find tutor information
     User.findFirst('userId = :userId', {':userId' : classes.userId}, function(err, user) {
       if (err) {
         callback(err, null);
         return;
       }
 
-      classes.user = user
-
+      //find user information
       User.findFirst('userId = :userId', {':userId' : data.userId}, function(err, user) {
         if (err) {
           callback(err, null);
@@ -43,7 +42,6 @@ module.exports.applyClass = (event, context, callback) => {
         }
         var newApplyClass = new ApplyClass();
         newApplyClass.applyId = uuidv4();
-        //newApplyClass.numberOfStudent = 
         newApplyClass.classId = classId;
         newApplyClass.className = classes.title;
         newApplyClass.registerAt = Utilities.getCurrentTime();
@@ -56,15 +54,32 @@ module.exports.applyClass = (event, context, callback) => {
         newApplyClass.time = classes.time;
         newApplyClass.title = classes.title;
 
+        let studentInfo =  classes.studentInfo || []
+        studentInfo.push({
+          applyId: newApplyClass.applyId,
+          userId: data.userId,
+        });
+
         //newApplyClass.classTimeList = 
         newApplyClass.saveOrUpdate(function(err, applyClass) {
           if (err) {
             callback(err, null);
             return;
           }
-          response.statusCode = ServerConstant.API_CODE_OK;
-          Utilities.bind(applyClass, response);
-          callback(null, response);
+
+          classes.numberOfStudent += 1;
+          classes.studentInfo = studentInfo;
+          classes.user = user
+
+          classes.saveOrUpdate(function(err, classes) {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+            response.statusCode = ServerConstant.API_CODE_OK;
+            Utilities.bind(applyClass, response);
+            callback(null, response);
+          })
         });
       });
     })

@@ -99,7 +99,7 @@ module.exports.getClassDetail = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
   const classId = event.path.id;
-
+  let lastEvaluatedKey = data && data.lastStartKey ?  {classId: data.lastStartKey} : null;
   let response = new APIResponseClassModel();
 
   Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
@@ -108,26 +108,54 @@ module.exports.getClassDetail = (event, context, callback) => {
       callback(err, null);
       return;
     }
-
+    //find tutor information
     User.findFirst('userId = :userId', {':userId' : classes.userId}, function(err, user) {
       if (err) {
         callback(err, null);
         return;
       }
-    classes.user = user
-    response.statusCode = ServerConstant.API_CODE_OK;
-    Utilities.bind(classes, response);
-    callback(null, response);
-    });
+      if (classes.studentInfo.length === 0) {
+        response.statusCode = ServerConstant.API_CODE_OK;
+        response.studentInfo = [];
+        response.classes.user = user
+        callback(null, response);
+      } else {
+          var expressionAttibuteValues = {};
+          classes.studentInfo.forEach((value, index) => expressionAttibuteValues[":userId" + index] = value.userId);
 
+          // console.log('expressionAttibuteValues', expressionAttibuteValues);
+          var filterExpression = `userId IN (${Object.keys(expressionAttibuteValues).toString()})`;
+
+          // console.log('filterExpression', filterExpression)
+
+          User.findAll(filterExpression, expressionAttibuteValues, lastEvaluatedKey, 20, function(err, studentInfo) {
+            if (err) {
+              callback(err, null);
+            } else {
+              // console.warn('studentInfo', studentInfo)
+              // studentInfo.forEach(cls => cls.liked = true)
+              response.statusCode = ServerConstant.API_CODE_OK;
+              Utilities.bind({studentInfo}, response);
+              response.user = user
+              callback(null, response);
+            }
+        });
+      }
+    })
   })
+  //     classes.user = user
+  //     response.statusCode = ServerConstant.API_CODE_OK;
+  //     Utilities.bind(classes, response);
+  //     callback(null, response);
+  //     });
+
+  // })
 };
 
 module.exports.getFavouriteClassList = (event, context, callback) => {
   const data = event.body;
   let response = new APIResponseClassListModel();
   var ids = data;
-
   if (!Array.isArray(ids)) {
     response.statusCode = ServerConstant.API_CODE_INVALID_PARAMS;
     callback(null, response);
