@@ -117,7 +117,7 @@ module.exports.getClassDetail = (event, context, callback) => {
       if (classes.studentInfo.length === 0) {
         response.statusCode = ServerConstant.API_CODE_OK;
         response.studentInfo = [];
-        response.classes.user = user
+        response.user = user
         callback(null, response);
       } else {
           var expressionAttibuteValues = {};
@@ -133,7 +133,6 @@ module.exports.getClassDetail = (event, context, callback) => {
               callback(err, null);
             } else {
               // console.warn('studentInfo', studentInfo)
-              // studentInfo.forEach(cls => cls.liked = true)
               response.statusCode = ServerConstant.API_CODE_OK;
               Utilities.bind({studentInfo}, response);
               response.user = user
@@ -143,13 +142,6 @@ module.exports.getClassDetail = (event, context, callback) => {
       }
     })
   })
-  //     classes.user = user
-  //     response.statusCode = ServerConstant.API_CODE_OK;
-  //     Utilities.bind(classes, response);
-  //     callback(null, response);
-  //     });
-
-  // })
 };
 
 module.exports.getFavouriteClassList = (event, context, callback) => {
