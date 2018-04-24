@@ -266,25 +266,56 @@ module.exports.searchClassList = (event, context, callback) => {
         expressionValue[':skill'] = data[obj];
       } else if (obj == 'advancedSearch' && data[obj]) {
         for (var key in data.advancedSearch) {
-          if (data.advancedSearch[key] && key != "chargeType" && key != "sortType" && key != "isAscending") {
+          if (data.advancedSearch[key] && key != "chargeType") {
             if (key == 'searchPrice') {
               exp.push(`fee <= :${key}`);
               expressionValue[":"+key] = data.advancedSearch[key];
-            }
-            else if (key == 'address' && data.advancedSearch[key]) {
-                exp.push(`contains(address.formatted_address, :${key})`);
-                expressionValue[":"+key] = data.advancedSearch[key];
-            }
-            else if (key == 'keyword' && data.advancedSearch[key]){
-              exp.push(`(contains(className, :className) or contains(category, :category) or contains(skill, :skill))`);
-              expressionValue[':className'] = data.advancedSearch[key];
-              expressionValue[':category'] = data.advancedSearch[key];
-              expressionValue[':skill'] = data.advancedSearch[key];
             }
             else {
               exp.push(`contains(${key}, :${key})`);
               expressionValue[":"+key] = data.advancedSearch[key];
             }
+          }
+        }
+      } else if (obj == 'sorting') {
+        for (var key in data.sorting) {
+          if (data.sorting.sortType == 'distance') {
+            const latPerKm = 1 / 110.574;
+            const lngPerKm = 1 / 111.320 * Math.cos(lat * Math.PI/180);
+
+            const limitKm = 5;
+
+            var sumLat = lat + limitKm * latPerKm;
+            var sumLng = lng + limitKm * lngPerKm;
+
+            var diffLat = lat - limitKm * latPerKm;
+            var diffLng = lng - limitKm * lngPerKm;
+
+            exp.push('(address.coordinate.lat BETWEEN :diffLat and :sumLat) and (address.coordinate.lng BETWEEN :diffLng and :sumLng)');
+            expressValue[":sumLat"] = sumLat;
+            expressValue[":sumLng"] = sumLng;
+            expressValue[":diffLat"] = diffLat;
+            expressValue[":diffLng"] = diffLng;
+          }
+          else {
+            expression = exp.join(' and ')
+
+            if (exp.length === 0) {
+              expression = null;
+              expressionValue = null;
+            }
+            
+            Class.findAllByOrder(expression, expressionValue, data.lastStartKey, 20, data.sorting.sortType, data.sorting.isAscending, function(err, classList) {
+
+              if (err) {
+                callback(err, null);
+                return;
+              }
+              response.statusCode = ServerConstant.API_CODE_OK;
+              Utilities.bind({classList}, response);
+              callback(null, response);
+              return;
+            })
           }
         }
       }
@@ -296,50 +327,8 @@ module.exports.searchClassList = (event, context, callback) => {
       expression = null;
       expressionValue = null;
     }
-    //called by
-    if (data.advancedSearch) {
-      //
-      if (data.advancedSearch.sortType) {
-        if (data.advancedSearch.sortType == 'distance') {
-          const latPerKm = 1 / 110.574;
-          const lngPerKm = 1 / 111.320 * Math.cos(lat * Math.PI/180);
+    getResponse(expression, expressionValue, data, response, callback)
 
-          const limitKm = 5;
-
-          var sumLat = lat + limitKm * latPerKm;
-          var sumLng = lng + limitKm * lngPerKm;
-
-          var diffLat = lat - limitKm * latPerKm;
-          var diffLng = lng - limitKm * lngPerKm;
-
-          expression += 'and (address.coordinate.lat BETWEEN :diffLat and :sumLat) and (address.coordinate.lng BETWEEN :diffLng and :sumLng)'
-          expressValue[":sumLat"] = sumLat;
-          expressValue[":sumLng"] = sumLng;
-          expressValue[":diffLat"] = diffLat;
-          expressValue[":diffLng"] = diffLng;
-
-          getResponse(expression, expressionValue, data, response, callback)
-        }
-        else {
-          // console.log (data.advancedSearch.isAscending);
-          Class.findAllByOrder(expression, expressionValue, data.lastStartKey, 20, data.advancedSearch.sortType, data.advancedSearch.isAscending, function(err, classList) {
-
-            if (err) {
-              callback(err, null);
-              return;
-            }
-            response.statusCode = ServerConstant.API_CODE_OK;
-            Utilities.bind({classList}, response);
-            callback(null, response);
-          })
-        }
-      }
-      else {
-        getResponse(expression, expressionValue, data, response, callback)
-      }
-    } else {
-      getResponse(expression, expressionValue, data, response, callback)
-    }
   } else {
     getResponse(expression, expressionValue, data, response, callback)
   }
