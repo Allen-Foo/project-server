@@ -277,58 +277,57 @@ module.exports.searchClassList = (event, context, callback) => {
             }
           }
         }
-      } else if (obj == 'sort') {
-        for (var key in data.sort) {
-          if (data.sort.sortType == 'distance') {
-            const latPerKm = 1 / 110.574;
-            const lngPerKm = 1 / 111.320 * Math.cos(lat * Math.PI/180);
+      } else if (obj == 'sort' && data[obj]) {
+        if (data.sort.sortType == 'distance') {
+          const latPerKm = 1 / 110.574;
+          const lngPerKm = 1 / 111.320 * Math.cos(lat * Math.PI/180);
 
-            const limitKm = 5;
+          const limitKm = 5;
 
-            var sumLat = lat + limitKm * latPerKm;
-            var sumLng = lng + limitKm * lngPerKm;
+          var sumLat = lat + limitKm * latPerKm;
+          var sumLng = lng + limitKm * lngPerKm;
 
-            var diffLat = lat - limitKm * latPerKm;
-            var diffLng = lng - limitKm * lngPerKm;
+          var diffLat = lat - limitKm * latPerKm;
+          var diffLng = lng - limitKm * lngPerKm;
 
-            exp.push('(address.coordinate.lat BETWEEN :diffLat and :sumLat) and (address.coordinate.lng BETWEEN :diffLng and :sumLng)');
-            expressValue[":sumLat"] = sumLat;
-            expressValue[":sumLng"] = sumLng;
-            expressValue[":diffLat"] = diffLat;
-            expressValue[":diffLng"] = diffLng;
+          exp.push('(address.coordinate.lat BETWEEN :diffLat and :sumLat) and (address.coordinate.lng BETWEEN :diffLng and :sumLng)');
+          expressValue[":sumLat"] = sumLat;
+          expressValue[":sumLng"] = sumLng;
+          expressValue[":diffLat"] = diffLat;
+          expressValue[":diffLng"] = diffLng;
+        }
+        else {
+          expression = exp.join(' and ')
+
+          if (exp.length === 0) {
+            expression = null;
+            expressionValue = null;
           }
-          else {
-            expression = exp.join(' and ')
+          
+          Class.findAllByOrder(expression, expressionValue, data.lastStartKey, 20, data.sort.sortType, data.sort.isAscending, function(err, classList) {
 
-            if (exp.length === 0) {
-              expression = null;
-              expressionValue = null;
-            }
-            
-            Class.findAllByOrder(expression, expressionValue, data.lastStartKey, 20, data.sort.sortType, data.sort.isAscending, function(err, classList) {
-
-              if (err) {
-                callback(err, null);
-                return;
-              }
-              response.statusCode = ServerConstant.API_CODE_OK;
-              Utilities.bind({classList}, response);
-              callback(null, response);
+            if (err) {
+              callback(err, null);
               return;
-            })
-          }
+            }
+            response.statusCode = ServerConstant.API_CODE_OK;
+            Utilities.bind({classList}, response);
+            callback(null, response);
+            return;
+          })
         }
       }
     }
 
-    expression = exp.join(' and ')
+    if (!data.sort) {
+      expression = exp.join(' and ')
 
-    if (exp.length === 0) {
-      expression = null;
-      expressionValue = null;
+      if (exp.length === 0) {
+        expression = null;
+        expressionValue = null;
+      }
+      getResponse(expression, expressionValue, data, response, callback)
     }
-    getResponse(expression, expressionValue, data, response, callback)
-
   } else {
     getResponse(expression, expressionValue, data, response, callback)
   }
