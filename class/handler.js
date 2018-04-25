@@ -115,6 +115,7 @@ module.exports.getClassDetail = (event, context, callback) => {
         return;
       }
       if (classes.studentInfo.length === 0) {
+        Utilities.bind(classes, response);
         response.statusCode = ServerConstant.API_CODE_OK;
         response.studentInfo = [];
         response.user = user
@@ -133,8 +134,9 @@ module.exports.getClassDetail = (event, context, callback) => {
               callback(err, null);
             } else {
               // console.warn('studentInfo', studentInfo)
+              Utilities.bind(classes, response);
               response.statusCode = ServerConstant.API_CODE_OK;
-              Utilities.bind({studentInfo}, response);
+              response.studentInfo = studentInfo
               response.user = user
               callback(null, response);
             }
