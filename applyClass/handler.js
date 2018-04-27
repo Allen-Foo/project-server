@@ -28,14 +28,13 @@ module.exports.applyClass = (event, context, callback) => {
       return;
     }
     //find tutor information
-    User.findFirst('userId = :userId', {':userId' : classes.userId}, function(err, user) {
+    User.findFirst('userId = :userId', {':userId' : classes.userId}, function(err, tutor) {
       if (err) {
         callback(err, null);
         return;
       }
-
       //find user information
-      User.findFirst('userId = :userId', {':userId' : data.userId}, function(err, user) {
+      User.findFirst('userId = :userId', {':userId' : data.userId}, function(err, student) {
         if (err) {
           callback(err, null);
           return;
@@ -46,9 +45,9 @@ module.exports.applyClass = (event, context, callback) => {
         newApplyClass.className = classes.title;
         newApplyClass.registerAt = Utilities.getCurrentTime();
         newApplyClass.userId = data.userId;
-        newApplyClass.userName = user.username;
+        newApplyClass.userName = student.username;
         newApplyClass.tutorId = classes.userId;
-        newApplyClass.tutorName = classes.user.username;
+        newApplyClass.tutorName = tutor.username;
         newApplyClass.photoList = classes.photoList;
         newApplyClass.address = classes.address;
         newApplyClass.time = classes.time;
@@ -69,7 +68,7 @@ module.exports.applyClass = (event, context, callback) => {
 
           classes.numberOfStudent += 1;
           classes.studentInfo = studentInfo;
-          classes.user = user
+          classes.user = tutor
 
           classes.saveOrUpdate(function(err, classes) {
             if (err) {
