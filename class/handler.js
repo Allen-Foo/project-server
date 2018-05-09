@@ -256,10 +256,7 @@ module.exports.searchClassList = (event, context, callback) => {
     let exp = [];
     expressionValue = {};
     for (var obj in data) {
-      if (obj == 'address' && data[obj]){
-        exp.push(`contains(address.formatted_address, :${obj})`);
-        expressionValue[":"+obj] = data[obj];
-      } else if (obj == 'keyword' && data[obj]){
+      if (obj == 'keyword' && data[obj]){
         exp.push(`(contains(title, :className) or contains(category, :category) or contains(skill, :skill))`);
         expressionValue[':className'] = data[obj];
         expressionValue[':category'] = data[obj];
@@ -270,52 +267,50 @@ module.exports.searchClassList = (event, context, callback) => {
             if (key == 'searchPrice') {
               exp.push(`fee <= :${key}`);
               expressionValue[":"+key] = data.filter[key];
-            }
-            else {
+            } else if (key == 'location') {
+              let lat  = data.filter.location.lat;
+              let lng = data.filter.location.lng;
+              const latPerKm = 1 / 110.574;
+              const lngPerKm = 1 / 111.320 * Math.cos(lat * Math.PI/180);
+
+              const limitKm = 1;
+
+              var sumLat = lat + limitKm * latPerKm;
+              var sumLng = lng + limitKm * lngPerKm;
+
+              var diffLat = lat - limitKm * latPerKm;
+              var diffLng = lng - limitKm * lngPerKm;
+
+              exp.push('(address.coordinate.lat BETWEEN :diffLat and :sumLat) and (address.coordinate.lng BETWEEN :diffLng and :sumLng)');
+              expressionValue[":sumLat"] = sumLat;
+              expressionValue[":sumLng"] = sumLng;
+              expressionValue[":diffLat"] = diffLat;
+              expressionValue[":diffLng"] = diffLng;
+            } else {
               exp.push(`contains(${key}, :${key})`);
               expressionValue[":"+key] = data.filter[key];
             }
           }
         }
       } else if (obj == 'sort' && data[obj]) {
-        if (data.sort.sortType == 'distance') {
-          const latPerKm = 1 / 110.574;
-          const lngPerKm = 1 / 111.320 * Math.cos(lat * Math.PI/180);
+        expression = exp.join(' and ')
 
-          const limitKm = 5;
-
-          var sumLat = lat + limitKm * latPerKm;
-          var sumLng = lng + limitKm * lngPerKm;
-
-          var diffLat = lat - limitKm * latPerKm;
-          var diffLng = lng - limitKm * lngPerKm;
-
-          exp.push('(address.coordinate.lat BETWEEN :diffLat and :sumLat) and (address.coordinate.lng BETWEEN :diffLng and :sumLng)');
-          expressValue[":sumLat"] = sumLat;
-          expressValue[":sumLng"] = sumLng;
-          expressValue[":diffLat"] = diffLat;
-          expressValue[":diffLng"] = diffLng;
+        if (exp.length === 0) {
+          expression = null;
+          expressionValue = null;
         }
-        else {
-          expression = exp.join(' and ')
+        
+        Class.findAllByOrder(expression, expressionValue, data.lastStartKey, 20, data.sort.sortType, data.sort.isAscending, function(err, classList) {
 
-          if (exp.length === 0) {
-            expression = null;
-            expressionValue = null;
-          }
-          
-          Class.findAllByOrder(expression, expressionValue, data.lastStartKey, 20, data.sort.sortType, data.sort.isAscending, function(err, classList) {
-
-            if (err) {
-              callback(err, null);
-              return;
-            }
-            response.statusCode = ServerConstant.API_CODE_OK;
-            Utilities.bind({classList}, response);
-            callback(null, response);
+          if (err) {
+            callback(err, null);
             return;
-          })
-        }
+          }
+          response.statusCode = ServerConstant.API_CODE_OK;
+          Utilities.bind({classList}, response);
+          callback(null, response);
+          return;
+        })
       }
     }
 
