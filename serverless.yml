@@ -185,3 +185,11 @@ functions:
           cors: true
           integration: lambda
 
+  duplicateClass:
+    handler: class/handler.duplicateClass
+    events:
+      - http:
+          path: duplicateClass/{id}
+          method: post
+          cors: true
+          integration: lambda

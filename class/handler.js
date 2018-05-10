@@ -79,13 +79,13 @@ module.exports.getClassList = (event, context, callback) => {
   let lastEvaluatedKey = data && data.lastStartKey ?  {classId: data.lastStartKey} : null;
   let isLastClass = false;
 
-  Class.findAll('userId = :userId', {':userId' : data.userId}, lastEvaluatedKey, 6, function(err, classList) {
+  Class.findAll('userId = :userId', {':userId' : data.userId}, lastEvaluatedKey, 10, function(err, classList) {
 
     if (err) {
       callback(err, null);
       return;
     }
-    if (classList.length < 6){
+    if (classList.length < 10){
       isLastClass = true
     }
     response.statusCode = ServerConstant.API_CODE_OK;
@@ -395,5 +395,40 @@ module.exports.giveComment = (event, context, callback) => {
         callback(null, response);
       });
     });
+  })
+};
+
+module.exports.duplicateClass = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+  const classId = event.path.id;
+
+  let response = new APIResponseClassListModel();
+
+  Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+
+    let duplicateClass = new Class();
+    Utilities.bind(classes, duplicateClass)
+    duplicateClass.createdAt = Utilities.getCurrentTime();
+    duplicateClass.classId = uuidv4();
+    duplicateClass.title = classes.title + ' (1)';
+    duplicateClass.numberOfStudent = 0;
+    duplicateClass.studentInfo = [];
+
+    duplicateClass.saveOrUpdate(function(err, res) {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+      console.log('duplicateClass', duplicateClass)
+      response.statusCode = ServerConstant.API_CODE_OK;
+      Utilities.bind(duplicateClass, response);
+      callback(null, response);
+    })
   })
 };
