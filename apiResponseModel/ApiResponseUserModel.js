@@ -10,6 +10,7 @@ class ApiResponseUserModel extends APIResponseBaseModel {
       this.phone = '';
       this.address = '';
       this.isTutor = false;
+      this.isCompany = false;
       this.skill = '';
       this.introduction = '';
       this.awsId = '';
@@ -19,7 +20,7 @@ class ApiResponseUserModel extends APIResponseBaseModel {
       this.avatarUrl = '';
       this.bookmark = [];
       this.totalRatings = 0;
-
+      this.companyId = '';
     }
 }
 

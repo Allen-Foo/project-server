@@ -22,6 +22,7 @@ class APIResponseClassModel extends APIResponseBaseModel {
       this.numberOfStudent = 0;
       this.user = {};
       this.studentInfo = [];
+      this.companyId = '';
     }
 }
 

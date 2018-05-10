@@ -19,6 +19,7 @@ class ApplyClass extends Entity {
     this.classTimeList = [];
     this.time = 'null';
     this.title = 'null';
+    this.companyId = 'null';
   }
 }
 
