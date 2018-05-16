@@ -9,8 +9,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
     "file-type": "^7.5.0",
     "moment": "^2.20.1",
+    "paypal-rest-sdk": "^1.8.1",
+    "serverless-http": "^1.5.5",
     "sha1": "^1.1.1",
     "uuid": "^3.1.0",
     "wait.for": "^0.6.6",

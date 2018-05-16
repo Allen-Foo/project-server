@@ -84,7 +84,7 @@ functions:
           method: post
           cors: true
           integration: lambda
-          
+
   createClass:
     handler: class/handler.createClass
     events:
@@ -156,7 +156,7 @@ functions:
           method: post
           cors: true
           integration: lambda
-          
+
   giveComment:
     handler: class/handler.giveComment
     events:
@@ -193,3 +193,10 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  app:
+    handler: payment/paypal.handler
+    events:
+      - http: POST /buy
+      - http: ANY /
+      - http: 'ANY {proxy+}'
