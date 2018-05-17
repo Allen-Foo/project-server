@@ -15,7 +15,6 @@ class User extends Entity {
     this.name = 'null';
     this.username = 'null';
     this.isTutor = false;
-    this.isCompany = false;
     this.phone = 'null';
     this.skill = 'null';
     this.changePw = 'null';
@@ -26,7 +25,7 @@ class User extends Entity {
     this.avatarUrl = 'null';
     this.bookmark = [];
     this.totalRatings = 0;
-    this.companyId = 'null';
+    this.userRole = 'null';
   }
 }
 

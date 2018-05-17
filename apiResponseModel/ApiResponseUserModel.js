@@ -20,7 +20,7 @@ class ApiResponseUserModel extends APIResponseBaseModel {
       this.avatarUrl = '';
       this.bookmark = [];
       this.totalRatings = 0;
-      this.companyId = '';
+      this.userRole = '';
     }
 }
 

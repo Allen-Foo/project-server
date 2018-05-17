@@ -18,7 +18,6 @@ class APIResponseApplyClassModel extends APIResponseBaseModel {
       this.user = {};
       this.time = {};
       this.title = {};
-      this.companyId = '';
     }
 }
 

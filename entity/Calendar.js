@@ -12,6 +12,7 @@ class Calendar extends Entity {
     this.startTime = 'null';
     this.endTime = 'null';
     this.isTutor = 'null';
+    this.userRole = 'null';
   }
 }
 

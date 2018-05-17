@@ -23,7 +23,6 @@ class Class extends Entity {
     this.totalComments = 0;
     this.numberOfStudent = 0;
     this.studentInfo = [];
-    this.companyId = 'null';
   }
 }
 
