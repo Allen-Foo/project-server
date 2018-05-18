@@ -3,13 +3,13 @@ const s3 = new AWS.S3();
 var Utilities = require('../common/Utilities');
 const ServerConstant = require("../common/ServerConstant");
 const User = require('../entity/User');
-const ApiResponseUserModel = require('../apiResponseModel/ApiResponseUserModel');
+const APIResponseUserModel = require('../apiResponseModel/APIResponseUserModel');
 
 module.exports.updateProfile = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-	var response = new ApiResponseUserModel();
+	var response = new APIResponseUserModel();
   // update dynamoDb
   User.findFirst('awsId = :awsId', {':awsId' : data.awsId}, function(err, user) {
     if (err || user == null) {

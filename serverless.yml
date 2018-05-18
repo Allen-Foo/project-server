@@ -200,3 +200,12 @@ functions:
       - http: POST /buy
       - http: ANY /
       - http: 'ANY {proxy+}'
+
+  createTutor:
+    handler: tutor/handler.createTutor
+    events:
+      - http:
+          path: createTutor
+          method: post
+          cors: true
+          integration: lambda

@@ -1,6 +1,6 @@
 var APIResponseBaseModel = require("./APIResponseBaseModel");
 
-class APIResponseUserModel extends APIResponseBaseModel {
+class APIResponseTutorModel extends APIResponseBaseModel {
     constructor(statusCode) {
       super();
       this.email = '';
@@ -13,6 +13,7 @@ class APIResponseUserModel extends APIResponseBaseModel {
       this.skill = '';
       this.introduction = '';
       this.awsId = '';
+      this.userId = '';
       this.loginType = '';
       this.googleId = '';
       this.facebookId = '';
@@ -20,7 +21,8 @@ class APIResponseUserModel extends APIResponseBaseModel {
       this.bookmark = [];
       this.totalRatings = 0;
       this.userRole = '';
+      this.companyId = '';
     }
 }
 
-module.exports = APIResponseUserModel;
+module.exports = APIResponseTutorModel;

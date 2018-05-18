@@ -1,5 +1,5 @@
 'use strict';
-const ApiResponseUserModel = require('../apiResponseModel/ApiResponseUserModel');
+const APIResponseUserModel = require('../apiResponseModel/APIResponseUserModel');
 const User = require('../entity/User');
 const ServerConstant = require("../common/ServerConstant");
 const Utilities = require('../common/Utilities');
@@ -10,7 +10,7 @@ module.exports.login = (event, context, callback) => {
 
   // get user profile by using awsId
 
-  var response = new ApiResponseUserModel();
+  var response = new APIResponseUserModel();
 
   // check awsId valid
   if (!data.awsId) {
