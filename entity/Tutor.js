@@ -3,9 +3,9 @@ var Entity = require("./Entity");
 class Tutor extends Entity {
   constructor() {
     // Input tableName
-    super('user', 'userId');
+    super('tutor', 'tutorId');
     // Create All table attribute
-    this.userId = 'null';
+    this.tutorId = 'null';
     this.address = 'null';
     this.website = 'null';
     this.awsId = 'null';
