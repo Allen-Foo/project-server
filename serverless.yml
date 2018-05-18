@@ -194,12 +194,32 @@ functions:
           cors: true
           integration: lambda
 
-  app:
-    handler: payment/paypal.handler
+  buy:
+    handler: payment/handler.buy
     events:
-      - http: POST /buy
-      - http: ANY /
-      - http: 'ANY {proxy+}'
+      - http: 
+          path: buy
+          method: post
+          cors: true
+          integration: lambda
+
+  success:
+    handler: payment/handler.success
+    events:
+      - http: 
+          path: success
+          method: get
+          cors: true
+          integration: lambda
+
+  err:
+    handler: payment/handler.err
+    events:
+      - http: 
+          path: err
+          method: get
+          cors: true
+          integration: lambda
 
   createTutor:
     handler: tutor/handler.createTutor

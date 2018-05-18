@@ -1,9 +1,5 @@
-const serverless = require('serverless-http');
-const express = require('express')
-const app = express()
 const paypal = require('paypal-rest-sdk')
-const bodyParser = require('body-parser');
-
+// const applyClassHandler = require('../applyClass/handler')
 
 // configure paypal with the credentials you got when you created your paypal app
 paypal.configure({
@@ -12,17 +8,20 @@ paypal.configure({
   'client_secret': 'EHn4CKfEfBmTU776uOFzrM8wHdF6laJ-Mrk0p4QZ6UOd7NhuS6ueYiJlVndv85MRopaiQ8LBoaMzFL22' // your client secret
 });
 
-app.use(bodyParser.json({ strict: false }));
+module.exports.buy = (event, context, callback) => {
 
-app.post('/buy' , function ( req , res ) {
-
+  let req = event;
   if (typeof req.body.name != "string" ||
       typeof req.body.curr != "string" ||
       typeof req.body.desc != "string" ||
       !Number.isInteger(req.body.sku) ||
       !Number.isInteger(req.body.quan) ||
-      !isFinite(req.body.price))
-    return res.send({"status":"-1001", "msg":"parameter is missing/incorrect"});
+      !isFinite(req.body.price)
+    ) {
+    let response = {"status":"-1001", "msg":"parameter is missing/incorrect"};
+    callback(null, response);
+    return
+  }
 
   // create payment object
   let createPaymentJson = {
@@ -53,26 +52,28 @@ app.post('/buy' , function ( req , res ) {
   }
 
   // call the create Pay method
-  createPay( createPaymentJson )
-    .then( ( transaction ) => {
+  createPay(createPaymentJson)
+    .then(( transaction) => {
       var id = transaction.id;
       var links = transaction.links;
       var counter = links.length;
       while( counter -- ) {
         if ( links[counter].method == 'REDIRECT') {
-          return res.send( {"status":1,"redirect_url":links[counter].href,"msg":"redirect to paypal"});
+          let response = {"status":1,"redirect_url":links[counter].href,"msg":"redirect to paypal"}
+          callback(null, response);
+          return
         }
       }
     })
-    .catch( ( err ) => {
+    .catch((err) => {
       console.log( err );
-      res.send({"status":-1,"msg":err});
+      callback(err, null);
     });
-});
+}
 
 // success
-app.get('/success' , (req ,res ) => {
-  // console.log(req.query);
+module.exports.success = (event, context, callback) => {
+  let req = event;
 
   const payerId = req.query.PayerID;
   const paymentId = req.query.paymentId;
@@ -87,23 +88,29 @@ app.get('/success' , (req ,res ) => {
     }]
   };
 
+  // change the record of dynamoDB
+  // applyClassHandler.updateApplyClassTable()
+
   executePay(paymentId, execute_payment_json)
-  .then((payment)=>{
-    res.send({"status":1,"msg":"payment success","data":payment});
+  .then((payment) => {
+    let response = {"status":1,"msg":"payment success","data":payment}
+    callback(null, response);
+    return
   }).catch( ( err ) => {
     // console.log( err );
-    res.send({"status":-1,"msg":err});
+    callback(err, null);
   });
 
-})
+}
 
 // error
-app.get('/err' , (req , res) => {
-  res.send({"status":-1, "msg":req.query});
-})
+module.exports.err = (event, context, callback) => {
+  let response = {"status": -1, "msg": event.query}
+  callback(null, response);
+}
 
 // helper functions
-var createPay = ( payment ) => {
+let createPay = (payment) => {
   return new Promise( ( resolve , reject ) => {
     paypal.payment.create( payment , function( err , payment ) {
       console.log(payment);
@@ -117,7 +124,7 @@ var createPay = ( payment ) => {
   });
 };
 
-var executePay = (paymentID, paymentJson) => {
+let executePay = (paymentID, paymentJson) => {
   return new Promise( (resolve, reject) => {
     paypal.payment.execute(paymentID, paymentJson, function (error, payment) {
       if (error) {
@@ -128,5 +135,3 @@ var executePay = (paymentID, paymentJson) => {
     });
   });
 };
-
-module.exports.handler = serverless(app);

@@ -85,6 +85,63 @@ module.exports.applyClass = (event, context, callback) => {
   })
 };
 
+module.exports.updateApplyClassTable = () => {
+  Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
+
+    if (err) {
+      return false;
+    }
+    //find tutor information
+    User.findFirst('userId = :userId', {':userId' : classes.userId}, function(err, tutor) {
+      if (err) {
+        return false;
+      }
+      //find user information
+      User.findFirst('userId = :userId', {':userId' : data.userId}, function(err, student) {
+        if (err) {
+          return false;
+        }
+        var newApplyClass = new ApplyClass();
+        newApplyClass.applyId = uuidv4();
+        newApplyClass.classId = classId;
+        newApplyClass.className = classes.title;
+        newApplyClass.registerAt = Utilities.getCurrentTime();
+        newApplyClass.userId = data.userId;
+        newApplyClass.userName = student.username;
+        newApplyClass.tutorId = classes.userId;
+        newApplyClass.tutorName = tutor.username;
+        newApplyClass.photoList = classes.photoList;
+        newApplyClass.address = classes.address;
+        newApplyClass.time = classes.time;
+        newApplyClass.title = classes.title;
+
+        let studentInfo =  classes.studentInfo || []
+        studentInfo.push({
+          applyId: newApplyClass.applyId,
+          userId: data.userId,
+        });
+
+        //newApplyClass.classTimeList = 
+        newApplyClass.saveOrUpdate(function(err, applyClass) {
+          if (err) {
+            return false;
+          }
+
+          classes.numberOfStudent += 1;
+          classes.studentInfo = studentInfo;
+          classes.user = tutor
+
+          classes.saveOrUpdate(function(err, classes) {
+            if (err) {
+              return false;
+            }
+            return true
+          })
+        });
+      });
+    })
+}
+
 module.exports.getAppliedClassList = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
