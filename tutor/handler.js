@@ -36,5 +36,20 @@ module.exports.createTutor = (event, context, callback) => {
     response.statusCode = ServerConstant.API_CODE_OK;
     Utilities.bind(tutor, response);
     callback(null, response);
+    Utilities.bind(data, company);
+    var newTutor = new Tutor();
+    newTutor.companyId = company.userId;
+    newTutor.tutorId = uuidv4();
+    newTutor.registerAt = Utilities.getCurrentTime();
+
+    newTutor.saveOrUpdate(function(err, Tutor) {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+      response.statusCode = ServerConstant.API_CODE_OK;
+      Utilities.bind(Tutor, response);
+      callback(null, response);
+    })
   });
 };
