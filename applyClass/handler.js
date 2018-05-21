@@ -140,6 +140,7 @@ module.exports.updateApplyClassTable = () => {
         });
       });
     })
+  })
 }
 
 module.exports.getAppliedClassList = (event, context, callback) => {
