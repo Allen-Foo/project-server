@@ -91,7 +91,7 @@ module.exports.success = (event, context, callback) => {
 
   executePay(paymentId, execute_payment_json)
   .then((payment) => {
-    let response = {"status":1,"msg":"payment success","data":payment}
+    let response = {"status":1,"msg":"payment success","data": "success"}
 
     // change the record of dynamoDB
     let classId = payment.transactions[0].item_list.items[0].sku
