@@ -1,5 +1,5 @@
 const paypal = require('paypal-rest-sdk')
-// const applyClassHandler = require('../applyClass/handler')
+const applyClassHandler = require('../applyClass/handler')
 
 // configure paypal with the credentials you got when you created your paypal app
 paypal.configure({
@@ -14,7 +14,7 @@ module.exports.buy = (event, context, callback) => {
   if (typeof req.body.name != "string" ||
       typeof req.body.curr != "string" ||
       typeof req.body.desc != "string" ||
-      !Number.isInteger(req.body.sku) ||
+      typeof req.body.sku != "string"  ||
       !Number.isInteger(req.body.quan) ||
       !isFinite(req.body.price)
     ) {
@@ -40,14 +40,15 @@ module.exports.buy = (event, context, callback) => {
           "sku": req.body.sku, //item no.
           "price": req.body.price,
           "currency": req.body.curr,
-          "quantity": req.body.quan
+          "quantity": req.body.quan,
         }]
       },
       "amount": {
         "total": req.body.price,
         "currency": req.body.curr
       },
-      "description": req.body.desc
+      "description": req.body.desc,
+      "custom": req.body.userId, // save the user id at custom field
     }]
   }
 
@@ -88,12 +89,15 @@ module.exports.success = (event, context, callback) => {
     }]
   };
 
-  // change the record of dynamoDB
-  // applyClassHandler.updateApplyClassTable()
-
   executePay(paymentId, execute_payment_json)
   .then((payment) => {
     let response = {"status":1,"msg":"payment success","data":payment}
+
+    // change the record of dynamoDB
+    let classId = payment.transactions[0].item_list.items[0].sku
+    let userId = payment.transactions[0].custom
+    applyClassHandler.updateApplyClassTable(classId, userId)
+    
     callback(null, response);
     return
   }).catch( ( err ) => {

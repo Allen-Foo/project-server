@@ -85,7 +85,7 @@ module.exports.applyClass = (event, context, callback) => {
   })
 };
 
-module.exports.updateApplyClassTable = () => {
+module.exports.updateApplyClassTable = (classId, userId) => {
   Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
 
     if (err) {
@@ -97,7 +97,7 @@ module.exports.updateApplyClassTable = () => {
         return false;
       }
       //find user information
-      User.findFirst('userId = :userId', {':userId' : data.userId}, function(err, student) {
+      User.findFirst('userId = :userId', {':userId' : userId}, function(err, student) {
         if (err) {
           return false;
         }
@@ -106,7 +106,7 @@ module.exports.updateApplyClassTable = () => {
         newApplyClass.classId = classId;
         newApplyClass.className = classes.title;
         newApplyClass.registerAt = Utilities.getCurrentTime();
-        newApplyClass.userId = data.userId;
+        newApplyClass.userId = userId;
         newApplyClass.userName = student.username;
         newApplyClass.tutorId = classes.userId;
         newApplyClass.tutorName = tutor.username;
@@ -118,7 +118,7 @@ module.exports.updateApplyClassTable = () => {
         let studentInfo =  classes.studentInfo || []
         studentInfo.push({
           applyId: newApplyClass.applyId,
-          userId: data.userId,
+          userId: userId,
         });
 
         //newApplyClass.classTimeList = 
