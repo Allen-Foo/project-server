@@ -30,8 +30,8 @@ module.exports.buy = (event, context, callback) => {
       "payment_method": "paypal"
     },
     "redirect_urls": {
-      "return_url": "https://reaf1dgnga.execute-api.us-east-1.amazonaws.com/dev/success?price="+req.body.price+"&curr="+req.body.curr,
-      "cancel_url": "https://reaf1dgnga.execute-api.us-east-1.amazonaws.com/dev/err"
+      "return_url": process.env.GW_URL + "/success?price="+req.body.price+"&curr="+req.body.curr,
+      "cancel_url": process.env.GW_URL + "/err"
     },
     "transactions": [{
       "item_list": {
