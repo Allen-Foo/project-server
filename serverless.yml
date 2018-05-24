@@ -27,7 +27,7 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:us-east-1:*:*"
-      
+
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
@@ -213,29 +213,29 @@ functions:
           cors: true
           integration: lambda
 
-  buy:
-    handler: payment/handler.buy
+  payment:
+    handler: payment/handler.payment
     events:
       - http: 
-          path: buy
+          path: payment
           method: post
           cors: true
           integration: lambda
 
-  success:
-    handler: payment/handler.success
+  paymentSuccess:
+    handler: payment/handler.paymentSuccess
     events:
       - http: 
-          path: success
+          path: paymentSuccess
           method: get
           cors: true
           integration: lambda
 
-  err:
-    handler: payment/handler.err
+  paymentError:
+    handler: payment/handler.paymentError
     events:
       - http: 
-          path: err
+          path: paymentError
           method: get
           cors: true
           integration: lambda

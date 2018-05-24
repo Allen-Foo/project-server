@@ -8,7 +8,7 @@ paypal.configure({
   'client_secret': 'EHn4CKfEfBmTU776uOFzrM8wHdF6laJ-Mrk0p4QZ6UOd7NhuS6ueYiJlVndv85MRopaiQ8LBoaMzFL22' // your client secret
 });
 
-module.exports.buy = (event, context, callback) => {
+module.exports.payment = (event, context, callback) => {
 
   let req = event;
   if (typeof req.body.name != "string" ||
@@ -30,8 +30,8 @@ module.exports.buy = (event, context, callback) => {
       "payment_method": "paypal"
     },
     "redirect_urls": {
-      "return_url": process.env.GW_URL + "/success?price="+req.body.price+"&curr="+req.body.curr,
-      "cancel_url": process.env.GW_URL + "/err"
+      "return_url": process.env.GW_URL + "/paymentSuccess?price="+req.body.price+"&curr="+req.body.curr,
+      "cancel_url": process.env.GW_URL + "/paymentError"
     },
     "transactions": [{
       "item_list": {
@@ -73,7 +73,7 @@ module.exports.buy = (event, context, callback) => {
 }
 
 // success
-module.exports.success = (event, context, callback) => {
+module.exports.paymentSuccess = (event, context, callback) => {
   let req = event;
 
   const payerId = req.query.PayerID;
@@ -108,7 +108,7 @@ module.exports.success = (event, context, callback) => {
 }
 
 // error
-module.exports.err = (event, context, callback) => {
+module.exports.paymentError = (event, context, callback) => {
   let response = {"status": -1, "msg": event.query}
   callback(null, response);
 }
