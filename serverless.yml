@@ -248,3 +248,12 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  getTutorList:
+    handler: tutor/handler.getTutorList
+    events:
+      - http:
+          path: getTutorList
+          method: post
+          cors: true
+          integration: lambda

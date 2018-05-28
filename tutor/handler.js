@@ -5,13 +5,14 @@ const User = require('../entity/User');
 const ApplyClass = require('../entity/ApplyClass')
 const Tutor = require('../entity/Tutor')
 const APIResponseTutorModel = require('../apiResponseModel/APIResponseTutorModel');
+const APIResponseTutorListModel = require('../apiResponseModel/APIResponseTutorListModel');
 const Utilities = require('../common/Utilities');
 
-module.exports.tutor = (event, context, callback) => {
+module.exports.createTutor = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  let response = new APIResponseAppliedClassModel();
+  let response = new APIResponseTutorModel();
 
   if (!data.userId) {
     response.statusCode = ServerConstant.API_CODE_ACC_UNAUTHORIZED;
@@ -25,10 +26,11 @@ module.exports.tutor = (event, context, callback) => {
       callback(err, null);
       return;
     }
-    Utilities.bind(data, company);
     var newTutor = new Tutor();
-    newTutor.companyId = company.userId;
+    Utilities.bind(data.tutorData, newTutor);
+    newTutor.companyId = data.userId;
     newTutor.tutorId = uuidv4();
+    newTutor.userRole = 'tutor';
     newTutor.registerAt = Utilities.getCurrentTime();
 
     newTutor.saveOrUpdate(function(err, Tutor) {
@@ -41,4 +43,28 @@ module.exports.tutor = (event, context, callback) => {
       callback(null, response);
     })
   });
+};
+
+module.exports.getTutorList = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  let response = new APIResponseTutorListModel();
+  let lastEvaluatedKey = data && data.lastStartKey ?  {tutorId: data.lastStartKey} : null;
+  let isLastTutor = false;
+
+  Tutor.findAll('companyId = :userId', {':userId' : data.userId}, lastEvaluatedKey, 10, function(err, tutorList) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    if (tutorList.length < 10){
+      isLastTutor = true
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind({tutorList}, response);
+    response.isLastTutor = isLastTutor;
+    callback(null, response);
+  })
 };
