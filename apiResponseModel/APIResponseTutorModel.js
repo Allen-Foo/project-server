@@ -5,7 +5,7 @@ class APIResponseTutorModel extends APIResponseBaseModel {
       super();
       this.email = '';
       this.username = '';
-      this.name = '';
+      this.tutorName = '';
       this.website = '';
       this.phone = '';
       this.address = '';

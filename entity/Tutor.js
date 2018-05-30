@@ -12,7 +12,7 @@ class Tutor extends Entity {
     this.loginType = 'null';
     this.introduction = 'null';
     this.email = 'null';
-    this.name = 'null';
+    this.tutorName = 'null';
     this.username = 'null';
     this.phone = 'null';
     this.skill = 'null';
