@@ -332,3 +332,13 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+
+  deleteTutor:
+    handler: tutor/handler.deleteTutor
+    events:
+      - http:
+          path: deleteTutor/{id}
+          method: post
+          cors: true
+          integration: lambda

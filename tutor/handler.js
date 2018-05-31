@@ -68,3 +68,31 @@ module.exports.getTutorList = (event, context, callback) => {
     callback(null, response);
   })
 };
+
+module.exports.deleteTutor = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+  const tutorId = event.path.id;
+
+  let response = new APIResponseTutorModel();
+
+  Tutor.findFirst('tutorId = :tutorId', {':tutorId' : tutorId}, function(err, tutor) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+
+    // console.warn('classes', classes)
+
+    tutor.delete(function(error, res) {
+      if (error) {
+        callback(error, null);
+        return;
+      }
+      response.statusCode = ServerConstant.API_CODE_OK;
+      Utilities.bind(tutor, response);
+      callback(null, response);
+    })
+  })
+};
