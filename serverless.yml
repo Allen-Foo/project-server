@@ -133,6 +133,7 @@ functions:
   upload:
     handler: upload/handler.upload
     # The `events` block defines how to trigger the handler.upload code
+    role: myCustRole0
     events:
       - http:
           path: upload
