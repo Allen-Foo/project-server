@@ -82,3 +82,42 @@ module.exports.register = (event, context, callback) => {
   });
 
 };
+
+module.exports.validateNewUserInfo = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  var response = new APIResponseUserModel();
+
+  // data validation
+  if (!data.email || !data.username) {
+    response.statusCode = ServerConstant.API_CODE_ACC_INVALID_FIELDS;
+    callback(null, response);
+    return;
+  }
+
+  // check duplicate email
+  User.findFirst('email = :email or username = :username', {':email' : data.email, ':username' : data.username}, function(err, user) {
+    if (err) {
+      callback(err, null);
+      return;
+    } 
+    if (user == null) {
+      response.statusCode = ServerConstant.API_CODE_OK;
+      callback(null, response);
+    }
+    else {
+      if (user.username === data.username) {
+        response.statusCode = ServerConstant.API_CODE_ACC_DUPLICATE_USERNAME;
+        callback(null, response);  
+      }
+      else {
+        response.statusCode = ServerConstant.API_CODE_ACC_DUPLICATE_EMAIL;
+        callback(null, response);  
+      }
+
+      
+    }
+  });
+
+};

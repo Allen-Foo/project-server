@@ -119,6 +119,16 @@ functions:
           cors: true
           integration: lambda
 
+  validateNewUserInfo:
+    handler: register/handler.validateNewUserInfo
+    # The `events` block defines how to trigger the handler.validateNewUserInfo code
+    events:
+      - http:
+          path: validateNewUserInfo
+          method: post
+          cors: true
+          integration: lambda
+
   login:
     handler: login/handler.login
     # The `events` block defines how to trigger the handler.login code
