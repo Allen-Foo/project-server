@@ -2,6 +2,7 @@
 const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const User = require('../entity/User');
+const TutorInformation = require('../entity/TutorInformation');
 const APIResponseUserModel = require('../apiResponseModel/APIResponseUserModel');
 const Utilities = require('../common/Utilities');
 
@@ -12,28 +13,28 @@ module.exports.register = (event, context, callback) => {
   var response = new APIResponseUserModel();
 
   // check awsId valid
-  if (!data.awsId) {
+  if (!data.user.awsId) {
     response.statusCode = ServerConstant.API_CODE_ACC_NOT_LINKED_AWS_ID;
     callback(null, response);
     return;
   }
 
   // data validation
-  if (!data.email || !data.username) {
+  if (!data.user.email || !data.user.username) {
     response.statusCode = ServerConstant.API_CODE_ACC_INVALID_FIELDS;
     callback(null, response);
     return;
   }
 
   // check duplicate email
-  User.findFirst('awsId = :awsId', {':awsId' : data.awsId}, function(err, user) {
+  User.findFirst('awsId = :awsId', {':awsId' : data.user.awsId}, function(err, user) {
     if (err) {
       callback(err, null);
       return;
     } 
     if (user == null) {
       var newUser = new User();
-      Utilities.bind(data, newUser);
+      Utilities.bind(data.user, newUser);
       newUser.registerAt = Utilities.getCurrentTime();
       newUser.userId = uuidv4();
       newUser.saveOrUpdate(function(err, user) {
@@ -41,19 +42,38 @@ module.exports.register = (event, context, callback) => {
           callback(err, null);
           return;
         }
-        response.statusCode = ServerConstant.API_CODE_OK;
         Utilities.bind(newUser, response);
-        callback(null, response);
+
+        if (data.user.userRole === 'tutor') {
+          var tutorInformation = new TutorInformation ();
+          Utilities.bind(data.tutorInformation, tutorInformation);
+          tutorInformation.userId = newUser.userId;
+
+          tutorInformation.saveOrUpdate(function(err, tutorInformation) {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+
+            response.statusCode = ServerConstant.API_CODE_OK;
+            callback(null, response);
+
+          });
+        }
+        else {
+          response.statusCode = ServerConstant.API_CODE_OK;
+          callback(null, response);
+        }
       });
     } else {
-      if (data.loginType === 'email') {
-        console.log('user login by email:', data.email)
+      if (data.user.loginType === 'email') {
+        console.log('user login by email:', data.user.email)
         response.statusCode = ServerConstant.API_CODE_ACC_DUPLICATE_EMAIL;
         callback(null, response);  
       } else {
         // Facebook or Google login will use this api, the first time will trigger registration,
         // then the second time will trigger this, something like login
-        console.log('user login by ' + data.loginType + ':' + data.email)
+        console.log('user login by ' + data.user.loginType + ':' + data.user.email)
         Utilities.bind(user, response);
         response.statusCode = ServerConstant.API_CODE_OK;
         callback(null, response);
