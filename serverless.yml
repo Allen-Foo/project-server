@@ -6,7 +6,9 @@
 
 # The `service` block is the name of the service
 service: users
-
+plugins:
+  - serverless-nested-stack
+    
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
@@ -17,6 +19,7 @@ provider:
   environment:
     GW_URL: { "Fn::Join" : ["", [ "https://", { "Ref" : "ApiGatewayRestApi" }, ".execute-api.${self:custom.region}.amazonaws.com/${self:custom.stage}" ] ]  }
   role: myDefaultRole
+  
 
 custom:
   stage: ${opt:stage, self:provider.stage}
