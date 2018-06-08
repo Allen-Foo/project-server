@@ -353,3 +353,12 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  getProductList:
+    handler: product/handler.getProductList
+    events:
+      - http:
+          path: getProductList
+          method: post
+          cors: true
+          integration: lambda
