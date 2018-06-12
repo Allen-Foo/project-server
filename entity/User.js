@@ -26,6 +26,7 @@ class User extends Entity {
     this.bookmark = [];
     this.totalRatings = 0;
     this.userRole = 'null';
+    this.gold = 0;
   }
 }
 

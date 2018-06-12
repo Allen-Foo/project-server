@@ -8,7 +8,7 @@
 service: users
 plugins:
   - serverless-nested-stack
-    
+
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
@@ -19,7 +19,7 @@ provider:
   environment:
     GW_URL: { "Fn::Join" : ["", [ "https://", { "Ref" : "ApiGatewayRestApi" }, ".execute-api.${self:custom.region}.amazonaws.com/${self:custom.stage}" ] ]  }
   role: myDefaultRole
-  
+
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -47,7 +47,7 @@ resources:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
                     - logs:PutLogEvents
-                  Resource: 
+                  Resource:
                     - 'Fn::Join':
                       - ':'
                       -
@@ -65,7 +65,7 @@ resources:
                     - dynamodb:UpdateItem
                     - dynamodb:DeleteItem
                   Resource: "arn:aws:dynamodb:us-east-1:*:*"
-               
+
     myCustRole0:
       Type: AWS::IAM::Role
       Properties:
@@ -87,7 +87,7 @@ resources:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
                     - logs:PutLogEvents
-                  Resource: 
+                  Resource:
                     - 'Fn::Join':
                       - ':'
                       -
@@ -305,7 +305,7 @@ functions:
   payment:
     handler: payment/handler.payment
     events:
-      - http: 
+      - http:
           path: payment
           method: post
           cors: true
@@ -314,7 +314,7 @@ functions:
   paymentSuccess:
     handler: payment/handler.paymentSuccess
     events:
-      - http: 
+      - http:
           path: paymentSuccess
           method: get
           cors: true
@@ -323,7 +323,7 @@ functions:
   paymentError:
     handler: payment/handler.paymentError
     events:
-      - http: 
+      - http:
           path: paymentError
           method: get
           cors: true
@@ -362,6 +362,15 @@ functions:
     events:
       - http:
           path: getProductList
+          method: post
+          cors: true
+          integration: lambda
+
+  purchaseGold:
+    handler: product/handler.purchaseGold
+    events:
+      - http:
+          path: purchaseGold
           method: post
           cors: true
           integration: lambda

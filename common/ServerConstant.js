@@ -21,7 +21,10 @@ const ServerConstant = {
 	API_CODE_ACC_NOT_LINKED_AWS_ID: 306,
 	API_CODE_ACC_INCORRECT_USERNAME: 307,
 
-  API_CODE_ACC_UNAUTHORIZED: 401
+  API_CODE_ACC_UNAUTHORIZED: 401,
+
+  // product error
+  API_CODE_PRODUCT_NOT_FOUND: 501
 }
 
 module.exports = ServerConstant;

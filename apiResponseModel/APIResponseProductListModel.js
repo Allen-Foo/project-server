@@ -4,6 +4,7 @@ class APIResponseProductListModel extends APIResponseBaseModel {
     constructor(statusCode) {
       super();
       this.productList = [];
+      this.isLastProduct = false;
     }
 }
 
