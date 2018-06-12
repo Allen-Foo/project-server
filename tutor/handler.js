@@ -45,6 +45,38 @@ module.exports.createTutor = (event, context, callback) => {
   });
 };
 
+module.exports.updateTutor = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  let response = new APIResponseTutorModel();
+
+  if (!data.tutorId) {
+    response.statusCode = ServerConstant.API_CODE_ACC_UNAUTHORIZED;
+    callback(null, response);
+    return;
+  }
+  
+  //find user information
+  Tutor.findFirst('tutorId = :tutorId', {':tutorId' : data.tutorId}, function(err, tutor) {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    Utilities.bind(data.tutorData, tutor);
+
+    tutor.saveOrUpdate(function(err, Tutor) {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+      response.statusCode = ServerConstant.API_CODE_OK;
+      Utilities.bind(Tutor, response);
+      callback(null, response);
+    })
+  });
+};
+
 module.exports.getTutorList = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
