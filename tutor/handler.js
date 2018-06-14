@@ -63,7 +63,7 @@ module.exports.updateTutor = (event, context, callback) => {
       callback(err, null);
       return;
     }
-    Utilities.bind(data.tutorData, tutor);
+    Utilities.bind(data, tutor);
 
     tutor.saveOrUpdate(function(err, Tutor) {
       if (err) {
