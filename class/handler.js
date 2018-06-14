@@ -335,6 +335,13 @@ module.exports.giveComment = (event, context, callback) => {
   const classId = event.path.id;
   let response = new APIResponseClassModel();
 
+  // check userId valid
+  if (!data.comment || !data.comment.content || !data.comment.rating) {
+    response.statusCode = ServerConstant.API_CODE_ACC_INVALID_FIELDS;
+    callback(null, response);
+    return;
+  }
+
   Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
 
     if (err) {
