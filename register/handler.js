@@ -13,17 +13,55 @@ module.exports.register = (event, context, callback) => {
   var response = new APIResponseUserModel();
 
   // check awsId valid
-  if (!data.user.awsId) {
-    response.statusCode = ServerConstant.API_CODE_ACC_NOT_LINKED_AWS_ID;
-    callback(null, response);
-    return;
-  }
+  // if (!data.user.awsId) {
+  //   response.statusCode = ServerConstant.API_CODE_ACC_NOT_LINKED_AWS_ID;
+  //   callback(null, response);
+  //   return;
+  // }
 
   // data validation
   if (!data.user.email || !data.user.username) {
     response.statusCode = ServerConstant.API_CODE_ACC_INVALID_FIELDS;
     callback(null, response);
     return;
+  }
+
+  if (!data.user.awsId) {
+    // New user
+    var newUser = new User();
+      Utilities.bind(data.user, newUser);
+      newUser.registerAt = Utilities.getCurrentTime();
+      newUser.userId = uuidv4();
+      newUser.saveOrUpdate(function(err, user) {
+        if (err) {
+          callback(err, null);
+          return;
+        }
+        Utilities.bind(newUser, response);
+
+        if (data.user.userRole === 'tutor') {
+          var tutorInformation = new TutorInformation ();
+          Utilities.bind(data.tutorInformation, tutorInformation);
+          tutorInformation.userId = newUser.userId;
+
+          tutorInformation.saveOrUpdate(function(err, tutorInformation) {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+
+            response.statusCode = ServerConstant.API_CODE_OK;
+            callback(null, response);
+
+          });
+        }
+        else {
+          response.statusCode = ServerConstant.API_CODE_OK;
+          callback(null, response);
+        }
+      });
+
+      return;
   }
 
   // check duplicate email
