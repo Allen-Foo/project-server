@@ -19,6 +19,7 @@ provider:
   environment:
     GW_URL: { "Fn::Join" : ["", [ "https://", { "Ref" : "ApiGatewayRestApi" }, ".execute-api.${self:custom.region}.amazonaws.com/${self:custom.stage}" ] ]  }
   role: myDefaultRole
+  versionFunctions: false
 
 
 custom:
@@ -357,14 +358,14 @@ functions:
           cors: true
           integration: lambda
 
-  # updateTutor:
-  #   handler: tutor/handler.updateTutor
-  #   events:
-  #     - http:
-  #         path: updateTutor/{id}
-  #         method: post
-  #         cors: true
-  #         integration: lambda
+  updateTutor:
+    handler: tutor/handler.updateTutor
+    events:
+      - http:
+          path: updateTutor/{id}
+          method: post
+          cors: true
+          integration: lambda
 
   getProductList:
     handler: product/handler.getProductList
