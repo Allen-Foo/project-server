@@ -159,3 +159,35 @@ module.exports.validateNewUserInfo = (event, context, callback) => {
   });
 
 };
+
+module.exports.updateAWSId = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  var response = new APIResponseUserModel();
+
+  // check duplicate email
+  User.findFirst('username = :username', {':username' : data.username}, function(err, user) {
+    if (err) {
+      callback(err, null);
+      return;
+    } 
+    if (user == null) {
+      response.statusCode = ServerConstant.API_CODE_OK;
+      callback(null, response);
+    }
+    else {
+      user.awsId = data.awsId;
+      user.saveOrUpdate(function(err, user) {
+        if (err) {
+          callback(err, null);
+          return;
+        }
+
+        response.statusCode = ServerConstant.API_CODE_OK;
+        callback(null, response);
+      })
+    }
+  });
+
+};

@@ -133,6 +133,16 @@ functions:
           cors: true
           integration: lambda
 
+  updateAWSId:
+    handler: register/handler.updateAWSId
+    # The `events` block defines how to trigger the handler.validateNewUserInfo code
+    events:
+      - http:
+          path: updateAWSId
+          method: post
+          cors: true
+          integration: lambda
+
   login:
     handler: login/handler.login
     # The `events` block defines how to trigger the handler.login code
