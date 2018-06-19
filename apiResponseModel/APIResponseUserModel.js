@@ -20,6 +20,8 @@ class APIResponseUserModel extends APIResponseBaseModel {
       this.bookmark = [];
       this.totalRatings = 0;
       this.userRole = '';
+      this.gold = 0;
+      this.freeGold = 0;
     }
 }
 
