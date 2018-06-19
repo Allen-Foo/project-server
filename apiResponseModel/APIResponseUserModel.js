@@ -22,6 +22,7 @@ class APIResponseUserModel extends APIResponseBaseModel {
       this.userRole = '';
       this.gold = 0;
       this.freeGold = 0;
+      this.companyId = '';
     }
 }
 

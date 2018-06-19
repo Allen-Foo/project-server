@@ -27,6 +27,7 @@ class User extends Entity {
     this.totalRatings = 0;
     this.userRole = 'null';
     this.gold = 0;
+    this.companyId = 'null';
   }
 }
 

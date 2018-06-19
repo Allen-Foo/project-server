@@ -3,8 +3,7 @@ const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
 const User = require('../entity/User');
 const ApplyClass = require('../entity/ApplyClass')
-const Tutor = require('../entity/Tutor')
-const APIResponseTutorModel = require('../apiResponseModel/APIResponseTutorModel');
+const APIResponseUserModel = require('../apiResponseModel/APIResponseUserModel');
 const APIResponseTutorListModel = require('../apiResponseModel/APIResponseTutorListModel');
 const Utilities = require('../common/Utilities');
 
@@ -12,7 +11,7 @@ module.exports.createTutor = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  let response = new APIResponseTutorModel();
+  let response = new APIResponseUserModel();
 
   if (!data.userId) {
     response.statusCode = ServerConstant.API_CODE_ACC_UNAUTHORIZED;
@@ -26,10 +25,10 @@ module.exports.createTutor = (event, context, callback) => {
       callback(err, null);
       return;
     }
-    var newTutor = new Tutor();
+    var newTutor = new User();
     Utilities.bind(data.tutorData, newTutor);
     newTutor.companyId = data.userId;
-    newTutor.tutorId = uuidv4();
+    newTutor.userId = uuidv4();
     newTutor.userRole = 'tutor';
     newTutor.registerAt = Utilities.getCurrentTime();
 
@@ -49,16 +48,16 @@ module.exports.updateTutor = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  let response = new APIResponseTutorModel();
+  let response = new APIResponseUserModel();
 
-  if (!data.tutorId) {
+  if (!data.userId) {
     response.statusCode = ServerConstant.API_CODE_ACC_UNAUTHORIZED;
     callback(null, response);
     return;
   }
   
   //find user information
-  Tutor.findFirst('tutorId = :tutorId', {':tutorId' : data.tutorId}, function(err, tutor) {
+  User.findFirst('userId = :userId', {':userId' : data.userId}, function(err, tutor) {
     if (err) {
       callback(err, null);
       return;
@@ -85,7 +84,7 @@ module.exports.getTutorList = (event, context, callback) => {
   let lastEvaluatedKey = data && data.lastStartKey ?  {tutorId: data.lastStartKey} : null;
   let isLastTutor = false;
 
-  Tutor.findAll('companyId = :userId', {':userId' : data.userId}, lastEvaluatedKey, 10, function(err, tutorList) {
+  User.findAll('companyId = :userId', {':userId' : data.userId}, lastEvaluatedKey, 10, function(err, tutorList) {
 
     if (err) {
       callback(err, null);
@@ -104,11 +103,11 @@ module.exports.getTutorList = (event, context, callback) => {
 module.exports.deleteTutor = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
-  const tutorId = event.path.id;
+  const userId = event.path.id;
 
-  let response = new APIResponseTutorModel();
+  let response = new APIResponseUserModel();
 
-  Tutor.findFirst('tutorId = :tutorId', {':tutorId' : tutorId}, function(err, tutor) {
+  User.findFirst('userId = :userId', {':userId' : userId}, function(err, tutor) {
 
     if (err) {
       callback(err, null);
