@@ -1,0 +1,7 @@
+{
+  "name": "tutorAPI",
+  "version": "0.1.0",
+  "description": "a api doc for Tutor",
+  "title": "Tutor apiDoc browser",
+  "url" : "https://lb7irf6lp5.execute-api.us-east-1.amazonaws.com/dev"
+}
