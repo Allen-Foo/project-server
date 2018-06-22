@@ -6,10 +6,12 @@ class TutorInformation extends Entity {
     super('tutor_information', 'userId');
     // Create All table attribute
     this.userId = 'null';
-    this.selfIntro = '';
+    this.selfIntro = 'null';
     this.experience = '';
     this.achievement = '';
     this.profession = '';
+    this.revenue = 0;
+    this.pendingRevenue = 0;
   }
 }
 

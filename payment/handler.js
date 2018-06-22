@@ -1,5 +1,10 @@
 const paypal = require('paypal-rest-sdk')
 const applyClassHandler = require('../applyClass/handler')
+const purchaseGoldHandler = require('../product/handler')
+const uuidv4 = require('uuid/v4');
+const ServerConstant = require("../common/ServerConstant");
+const Transaction = require('../entity/Transaction');
+const Utilities = require('../common/Utilities');
 
 // configure paypal with the credentials you got when you created your paypal app
 paypal.configure({
@@ -15,6 +20,7 @@ module.exports.payment = (event, context, callback) => {
       typeof req.body.curr != "string" ||
       typeof req.body.desc != "string" ||
       typeof req.body.sku != "string"  ||
+      typeof req.body.type != "string" ||
       !Number.isInteger(req.body.quan) ||
       !isFinite(req.body.price)
     ) {
@@ -22,6 +28,13 @@ module.exports.payment = (event, context, callback) => {
     callback(null, response);
     return
   }
+
+  let customObj = {
+    "userId": req.body.userId, // save the user id at custom field
+    "productType": req.body.type,
+  }
+
+  let customJson = JSON.stringify(customObj);
 
   // create payment object
   let createPaymentJson = {
@@ -48,7 +61,7 @@ module.exports.payment = (event, context, callback) => {
         "currency": req.body.curr
       },
       "description": req.body.desc,
-      "custom": req.body.userId, // save the user id at custom field
+      "custom": customJson,
     }]
   }
 
@@ -93,13 +106,48 @@ module.exports.paymentSuccess = (event, context, callback) => {
   .then((payment) => {
     let response = {"status":1,"msg":"payment success","data": "success"}
 
+    let customObj = JSON.parse(payment.transactions[0].custom);
     // change the record of dynamoDB
-    let classId = payment.transactions[0].item_list.items[0].sku
-    let userId = payment.transactions[0].custom
-    applyClassHandler.updateApplyClassTable(classId, userId)
-    
-    callback(null, response);
-    return
+    let sku = payment.transactions[0].item_list.items[0].sku
+    let price = payment.transactions[0].item_list.items[0].price
+    let userId = customObj.userId
+    let productType = customObj.productType
+
+    var transaction = new Transaction();
+    transaction.transactionId = uuidv4();
+    transaction.userId = userId;
+    transaction.sku = sku;
+    transaction.amount = price;
+    transaction.paymentMethod = 'Paypal';
+    transaction.createdAt = Utilities.getCurrentTime();
+    transaction.type = productType;
+    transaction.saveOrUpdate(function (err, transaction) {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      if (productType == 'class') {
+        applyClassHandler.updateApplyClassTable(sku, userId, transaction.transactionId)
+        .then ((status)=> {
+          callback(null, response);
+          return;
+        })
+        .catch( ( err ) => {
+          callback(err, null);
+        });
+      }
+      else if (productType == 'coin') {
+        purchaseGoldHandler.updateProductTable(sku, userId, transactionId)
+        .then ((status)=> {
+          callback(null, response);
+          return;
+        })
+        .catch( ( err ) => {
+          callback(err, null);
+        });
+      }
+    });
   }).catch( ( err ) => {
     // console.log( err );
     callback(err, null);

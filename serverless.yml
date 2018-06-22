@@ -394,3 +394,12 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  getCoinHistoryList:
+    handler: product/handler.getCoinHistoryList
+    events:
+      - http:
+          path: getCoinHistoryList
+          method: post
+          cors: true
+          integration: lambda

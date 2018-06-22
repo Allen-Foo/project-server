@@ -5,13 +5,14 @@ class Transaction extends Entity {
     // Input tableName
     super('transaction', 'transactionId');
     // Create All table attribute
-    this.userId = 'null';
-    this.lessonId = 'null';
     this.transactionId = 'null';
-    this.startDate = 'null';
-    this.endDate = 'null';
-    this.totalPayment = 'null';
+    this.userId = 'null';
+    this.sku = 'null';
+    this.amount = 0;
+    this.paymentMethod = 'null';
+    this.type = 'null';
+    this.createdAt = 'null';
   }
 }
 
-module.exports = JoinedLesson;
+module.exports = Transaction;

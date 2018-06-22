@@ -20,7 +20,7 @@ module.exports.applyClass = (event, context, callback) => {
     callback(null, response);
     return;
   }
-	
+
 	Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
 
     if (err) {
@@ -59,7 +59,7 @@ module.exports.applyClass = (event, context, callback) => {
           userId: data.userId,
         });
 
-        //newApplyClass.classTimeList = 
+        //newApplyClass.classTimeList =
         newApplyClass.saveOrUpdate(function(err, applyClass) {
           if (err) {
             callback(err, null);
@@ -85,60 +85,63 @@ module.exports.applyClass = (event, context, callback) => {
   })
 };
 
-module.exports.updateApplyClassTable = (classId, userId) => {
-  Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
+module.exports.updateApplyClassTable = (classId, userId, transactionId) => {
+  return new Promise( ( resolve , reject ) => {
+    Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
 
-    if (err) {
-      return false;
-    }
-    //find tutor information
-    User.findFirst('userId = :userId', {':userId' : classes.userId}, function(err, tutor) {
       if (err) {
-        return false;
+        reject(err);
       }
-      //find user information
-      User.findFirst('userId = :userId', {':userId' : userId}, function(err, student) {
+      //find tutor information
+      User.findFirst('userId = :userId', {':userId' : classes.userId}, function(err, tutor) {
         if (err) {
-          return false;
+          reject(err);
         }
-        var newApplyClass = new ApplyClass();
-        newApplyClass.applyId = uuidv4();
-        newApplyClass.classId = classId;
-        newApplyClass.className = classes.title;
-        newApplyClass.registerAt = Utilities.getCurrentTime();
-        newApplyClass.userId = userId;
-        newApplyClass.userName = student.username;
-        newApplyClass.tutorId = classes.userId;
-        newApplyClass.tutorName = tutor.username;
-        newApplyClass.photoList = classes.photoList;
-        newApplyClass.address = classes.address;
-        newApplyClass.time = classes.time;
-        newApplyClass.title = classes.title;
-
-        let studentInfo =  classes.studentInfo || []
-        studentInfo.push({
-          applyId: newApplyClass.applyId,
-          userId: userId,
-        });
-
-        //newApplyClass.classTimeList = 
-        newApplyClass.saveOrUpdate(function(err, applyClass) {
+        //find user information
+        User.findFirst('userId = :userId', {':userId' : userId}, function(err, student) {
           if (err) {
-            return false;
+            reject(err);
           }
+          var newApplyClass = new ApplyClass();
+          newApplyClass.applyId = uuidv4();
+          newApplyClass.classId = classId;
+          newApplyClass.className = classes.title;
+          newApplyClass.registerAt = Utilities.getCurrentTime();
+          newApplyClass.userId = userId;
+          newApplyClass.userName = student.username;
+          newApplyClass.tutorId = classes.userId;
+          newApplyClass.tutorName = tutor.username;
+          newApplyClass.photoList = classes.photoList;
+          newApplyClass.address = classes.address;
+          newApplyClass.time = classes.time;
+          newApplyClass.title = classes.title;
+          newApplyClass.transactionId = transactionId;
 
-          classes.numberOfStudent += 1;
-          classes.studentInfo = studentInfo;
-          classes.user = tutor
+          let studentInfo =  classes.studentInfo || []
+          studentInfo.push({
+            applyId: newApplyClass.applyId,
+            userId: userId,
+          });
 
-          classes.saveOrUpdate(function(err, classes) {
+          //newApplyClass.classTimeList =
+          newApplyClass.saveOrUpdate(function(err, applyClass) {
             if (err) {
-              return false;
+              reject(err);
             }
-            return true
-          })
+
+            classes.numberOfStudent += 1;
+            classes.studentInfo = studentInfo;
+            classes.user = tutor
+
+            classes.saveOrUpdate(function(err, classes) {
+              if (err) {
+                reject(err);
+              }
+              resolve('success')
+            })
+          });
         });
-      });
+      })
     })
   })
 }

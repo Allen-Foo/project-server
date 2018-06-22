@@ -9,7 +9,7 @@ const APIResponsepPurchaseGoldModel = require('../apiResponseModel/APIResponsePu
 const APIResponseCoinHistoryListModel = require('../apiResponseModel/APIResponseCoinHistoryListModel');
 const Utilities = require('../common/Utilities');
 
-module.exports.getProductList = (event, context, callback) => {
+module.exports.getWalletRevenue = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
@@ -97,51 +97,6 @@ module.exports.purchaseGold = (event, context, callback) => {
   });
 
 };
-
-module.exports.updateProductTable = (productId, userId, transactionId) => {
-  return new Promise( ( resolve , reject ) => {
-    Product.findFirst('productId = :productId', {':productId' : data.productId}, function(err, product) {
-      if (err) {
-        reject (err);
-      }
-    	if (product != null) {
-        User.findFirst ('userId = :userId', {':userId' : data.userId}, function(err, user) {
-          if (err) {
-            reject (err);
-          }
-        	if (user != null) {
-            user.gold += product.gold;
-            user.saveOrUpdate(function (err, user) {
-              if (err) {
-                reject (err);
-              }
-              var coinHistory = new CoinHistory();
-              coinHistory.userId = user.userId;
-              coinHistory.coinHistoryId = uuidv4();
-              coinHistory.createdAt = Utilities.getCurrentTime();
-              coinHistory.gold = product.gold;
-              coinHistory.enAction = 'Purchase Coins';
-              coinHistory.tcAction = '金幣充值';
-              coinHistory.scAction = '金币充值';
-              coinHistory.saveOrUpdate(function (err, coinHistory) {
-                if (err) {
-                  reject (err);
-                }
-                  resolve (user);
-              });
-            });
-          }
-          else {
-            reject ('User is not find');
-          }
-        });
-      }
-      else {
-      	reject ('Product is not find');
-    	}
-    });
-  })
-}
 
 module.exports.getCoinHistoryList = (event, context, callback) => {
   // get data from the body of event
