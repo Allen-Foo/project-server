@@ -2,9 +2,11 @@ const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
 const User = require('../entity/User');
+const TutorInformation = require('../entity/TutorInformation');
 const ApplyClass = require('../entity/ApplyClass')
 const APIResponseUserModel = require('../apiResponseModel/APIResponseUserModel');
 const APIResponseTutorListModel = require('../apiResponseModel/APIResponseTutorListModel');
+const APIResponseTutorModel = require('../apiResponseModel/APIResponseTutorModel');
 const Utilities = require('../common/Utilities');
 
 
@@ -202,13 +204,14 @@ module.exports.getTutorList = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
+  let response = new APIResponseTutorListModel();
+
   if (!data.userId) {
     response.statusCode = ServerConstant.API_CODE_INVALID_PARAMS;
     callback(null, response);
     return;
   }
 
-  let response = new APIResponseTutorListModel();
   let lastEvaluatedKey = data && data.lastStartKey ?  {tutorId: data.lastStartKey} : null;
   let isLastTutor = false;
 
@@ -227,6 +230,90 @@ module.exports.getTutorList = (event, context, callback) => {
     callback(null, response);
   })
 };
+
+
+/**
+ * @api {post} /getTutorDetail Get Tutor List
+ * @apiName getTutorDetail
+ * @apiGroup Tutor
+ *
+ * @apiParam {String} userId Users unique ID.
+ *
+ * @apiSuccess {Number} statusCode statusCode of response.
+ * @apiSuccess {String} companyId  companyId of the User.
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *        "statusCode": 200,
+ *        "profile": {}
+ *        "selfIntro": ""
+ *        "profession": ""
+ *        "experience": ""
+ *        "achievement": ""
+ *     }
+ *
+ * @apiError NotAuthorizied The id of the tutor was not found.
+ *
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 401 Not Authorized
+ *     {
+ *       "error": "NotAuthorizied"
+ *     }
+ */
+module.exports.getTutorDetail = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+  let response = new APIResponseTutorModel();
+
+  if (!data.tutorId) {
+    response.statusCode = ServerConstant.API_CODE_INVALID_PARAMS;
+    callback(null, response);
+    return;
+  }
+
+  User.findFirst('userId = :userId', {':userId' : data.tutorId}, function(err, tutor) {
+    
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    let profile = {
+      'userId' : tutor.userId,
+      'address' : tutor.address,
+      'website' : tutor.website,
+      'introduction' : tutor.introduction,
+      'name' : tutor.name,
+      'username' : tutor.username,
+      'phone' : tutor.phone,
+      'skill' : tutor.skill,
+      'avatarUrl' : tutor.avatarUrl,
+      'totalRatings' : tutor.totalRatings,
+      'userRole' : tutor.userRole,
+      'companyId' : tutor.companyId
+    }
+
+    response.profile = profile;
+
+    TutorInformation.findFirst('userId = :userId', {':userId' : data.tutorId}, function(err, tutorInfo) {
+
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      response.selfIntro = tutorInfo.selfIntro;
+      response.profession = tutorInfo.profession;
+      response.experience = tutorInfo.experience;
+      response.achievement = tutorInfo.achievement;
+
+      response.statusCode = ServerConstant.API_CODE_OK;
+
+      callback(null, response);
+    })
+  })
+};
+
 
 /**
  * @api {post} /deleteTutor Delete Tutor
