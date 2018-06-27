@@ -86,9 +86,32 @@ module.exports.login = (event, context, callback) => {
       return;
     }
     else {
-    	response.statusCode = ServerConstant.API_CODE_TARGET_USER_NOT_FOUND;
-    	callback(null, response);
-      return;
-  	}
+      // New User
+      User.findFirst('username = :username', {':username' : data.username}, function(err, user) {
+        if (err) {
+          callback(err, null);
+          return;
+        } 
+        if (user == null) {
+          response.statusCode = ServerConstant.API_CODE_TARGET_USER_NOT_FOUND;
+          callback(null, response);
+          return;
+        }
+        else {
+          user.awsId = data.awsId;
+          user.saveOrUpdate(function(err, user) {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+  
+            response.statusCode = ServerConstant.API_CODE_OK;
+            Utilities.bind(user, response);
+  
+            callback(null, response);
+          });
+        }
+      });
+    }
   });
 };
