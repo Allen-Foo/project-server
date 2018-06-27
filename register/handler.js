@@ -40,7 +40,14 @@ module.exports.register = (event, context, callback) => {
         Utilities.bind(newUser, response);
 
         if (data.user.userRole === 'tutor') {
+          if (!data.tutorInformation) {
+            response.statusCode = ServerConstant.API_CODE_ACC_INVALID_FIELDS;
+            callback(null, response);
+            return;
+          }
+          
           var tutorInformation = new TutorInformation ();
+
           Utilities.bind(data.tutorInformation, tutorInformation);
           tutorInformation.userId = newUser.userId;
 
