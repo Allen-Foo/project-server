@@ -3,6 +3,7 @@ const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
 const User = require('../entity/User');
+const ClassCashBook = require('../entity/ClassCashBook');
 const APIResponseClassModel = require('../apiResponseModel/APIResponseClassModel');
 const APIResponseClassListModel = require('../apiResponseModel/APIResponseClassListModel');
 const Utilities = require('../common/Utilities');
@@ -30,9 +31,28 @@ module.exports.createClass = (event, context, callback) => {
       callback(err, null);
       return;
     }
-    response.statusCode = ServerConstant.API_CODE_OK;
-    Utilities.bind(res, response);
-    callback(null, response);
+
+    var classCashBook = new ClassCashBook();
+    classCashBook.classCashBookId = uuidv4();
+    classCashBook.userId = res.userId;
+    classCashBook.classId = res.classId;
+    var tmpDateArray = Object.keys(res.time);
+    tmpDateArray.forEach(function(part, index, theArray) {
+      theArray[index] = new Date (part)
+    });
+    var tmpDate = new Date(Math.max(...tmpDateArray));
+    tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
+    classCashBook.availableAt = tmpDate.toString();
+    classCashBook.saveOrUpdate(function(err, classCashBook) {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      response.statusCode = ServerConstant.API_CODE_OK;
+      Utilities.bind(res, response);
+      callback(null, response);
+    });
   });
 };
 
@@ -299,7 +319,7 @@ module.exports.searchClassList = (event, context, callback) => {
           expression = null;
           expressionValue = null;
         }
-        
+
         Class.findAllByOrder(expression, expressionValue, data.lastStartKey, 20, data.sort.sortType, data.sort.isAscending, function(err, classList) {
 
           if (err) {

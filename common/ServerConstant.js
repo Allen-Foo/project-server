@@ -24,7 +24,10 @@ const ServerConstant = {
   API_CODE_ACC_UNAUTHORIZED: 401,
 
   // product error
-  API_CODE_PRODUCT_NOT_FOUND: 501
+  API_CODE_PRODUCT_NOT_FOUND: 501,
+
+  // Common constant
+  THE_DAYS_CAN_GET_THE_REVENUE: 7
 }
 
 module.exports = ServerConstant;

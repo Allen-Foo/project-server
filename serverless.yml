@@ -401,3 +401,12 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  getWalletRevenue:
+    handler: wallet/handler.getWalletRevenue
+    events:
+      - http:
+          path: getWalletRevenue
+          method: post
+          cors: true
+          integration: lambda

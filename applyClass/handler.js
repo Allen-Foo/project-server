@@ -4,6 +4,7 @@ const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
 const User = require('../entity/User');
 const ApplyClass = require('../entity/ApplyClass')
+const ClassCashBook = require('../entity/ClassCashBook')
 const APIResponseAppliedClassModel = require('../apiResponseModel/APIResponseAppliedClassModel');
 const APIResponseAppliedClassListModel = require('../apiResponseModel/APIResponseAppliedClassListModel');
 const Utilities = require('../common/Utilities');
@@ -85,7 +86,7 @@ module.exports.applyClass = (event, context, callback) => {
   })
 };
 
-module.exports.updateApplyClassTable = (classId, userId, transactionId) => {
+module.exports.updateApplyClassTable = (classId, userId, price, transactionId) => {
   return new Promise( ( resolve , reject ) => {
     Class.findFirst('classId = :classId', {':classId' : classId}, function(err, classes) {
 
@@ -137,7 +138,39 @@ module.exports.updateApplyClassTable = (classId, userId, transactionId) => {
               if (err) {
                 reject(err);
               }
-              resolve('success')
+
+              ClassCashBook.findFirst ('classId = :classId', {':classId' : classId}, function(err, classCashBook) {
+                if (err) {
+                  reject(err);
+                }
+
+                if (!classCashBook) {
+                  var classCashBook = new ClassCashBook();
+                  classCashBook.classCashBookId = uuidv4();
+                  classCashBook.userId = classes.userId;
+                  classCashBook.classId = classes.classId;
+                  var tmpDateArray = Object.keys(classes.time);
+                  tmpDateArray.forEach(function(part, index, theArray) {
+                    theArray[index] = new Date (part)
+                  });
+                  var tmpDate = new Date(Math.max(...tmpDateArray));
+                  tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
+                  classCashBook.availableAt = tmpDate.toString();
+                }
+                let paymentList = classCashBook.paymentList || []
+                paymentList.push({
+                  userId: userId,
+                  payment: price,
+                  transactionId: transactionId,
+                });
+                classCashBook.isDirty = true;
+                classCashBook.saveOrUpdate(function(err, classCashBook) {
+                  if (err) {
+                    reject(err);
+                  }
+                  resolve('success')
+                })
+              })
             })
           });
         });
