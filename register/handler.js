@@ -32,6 +32,12 @@ module.exports.register = (event, context, callback) => {
       Utilities.bind(data.user, newUser);
       newUser.registerAt = Utilities.getCurrentTime();
       newUser.userId = uuidv4();
+      if (data.user.userRole === 'tutor') {
+        newUser.name = '星級導師'
+      }
+      else {
+        newUser.name = '星級用家'
+      }
       newUser.saveOrUpdate(function(err, user) {
         if (err) {
           callback(err, null);
