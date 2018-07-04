@@ -410,3 +410,30 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  getWithdrawnList:
+    handler: wallet/handler.getWithdrawnList
+    events:
+      - http:
+          path: getWithdrawnList
+          method: post
+          cors: true
+          integration: lambda
+
+  applyWithdrawn:
+    handler: wallet/handler.applyWithdrawn
+    events:
+      - http:
+          path: applyWithdrawn
+          method: post
+          cors: true
+          integration: lambda
+
+  approveWithdrawn:
+    handler: wallet/handler.approveWithdrawn
+    events:
+      - http:
+          path: approveWithdrawn
+          method: post
+          cors: true
+          integration: lambda

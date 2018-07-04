@@ -26,6 +26,9 @@ const ServerConstant = {
   // product error
   API_CODE_PRODUCT_NOT_FOUND: 501,
 
+  // withdrawn error
+  API_CODE_INSUFFICIENT_BALANCE: 601,
+
   // Common constant
   THE_DAYS_CAN_GET_THE_REVENUE: 7
 }

@@ -112,9 +112,15 @@ module.exports.paymentSuccess = (event, context, callback) => {
     let price = payment.transactions[0].item_list.items[0].price
     let userId = customObj.userId
     let productType = customObj.productType
+    let paymentId = payment.id
+    let paypalTransaction = payment.transactions
+    let payer = payment.payer
 
     var transaction = new Transaction();
     transaction.transactionId = uuidv4();
+    transaction.paymentId = paymentId;
+    transaction.paypalTransaction = paypalTransaction;
+    transaction.payer = payer;
     transaction.userId = userId;
     transaction.sku = sku;
     transaction.amount = price;
@@ -128,7 +134,7 @@ module.exports.paymentSuccess = (event, context, callback) => {
       }
 
       if (productType == 'class') {
-        applyClassHandler.updateApplyClassTable(sku, userId, transaction.transactionId)
+        applyClassHandler.updateApplyClassTable(sku, userId, price, transaction.transactionId)
         .then ((status)=> {
           callback(null, response);
           return;

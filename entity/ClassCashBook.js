@@ -11,7 +11,7 @@ class ClassCashBook extends Entity {
     this.paymentList = [];
     this.isDirty = false;
     this.availableAt = 'null';
-    this.availableDate = 'null';
+    this.availableDate = 0;
     this.isOpen = true;
   }
 }

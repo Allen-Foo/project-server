@@ -156,11 +156,12 @@ module.exports.updateApplyClassTable = (classId, userId, price, transactionId) =
                   var tmpDate = new Date(Math.max(...tmpDateArray));
                   tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
                   classCashBook.availableAt = tmpDate.toString();
+                  classCashBook.availableDate = Date.parse(tmpDate);
                 }
                 let paymentList = classCashBook.paymentList || []
                 paymentList.push({
                   userId: userId,
-                  payment: price,
+                  payment: parseInt(price),
                   transactionId: transactionId,
                 });
                 classCashBook.isDirty = true;
