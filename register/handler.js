@@ -32,6 +32,7 @@ module.exports.register = (event, context, callback) => {
       Utilities.bind(data.user, newUser);
       newUser.registerAt = Utilities.getCurrentTime();
       newUser.userId = uuidv4();
+      newUser.name = data.user.username;
       newUser.saveOrUpdate(function(err, user) {
         if (err) {
           callback(err, null);
