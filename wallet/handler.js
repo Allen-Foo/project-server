@@ -18,6 +18,9 @@ const APIResponseApproveWithdrawnModel = require('../apiResponseModel/APIRespons
 const APIResponseRefundListModel = require('../apiResponseModel/APIResponseRefundListModel');
 const APIResponseApplyRefundModel = require('../apiResponseModel/APIResponseApplyRefundModel');
 const APIResponseApproveRefundModel = require('../apiResponseModel/APIResponseApproveRefundModel');
+const APIResponsePaypalReportModel = require('../apiResponseModel/APIResponsePaypalReportModel');
+const APIResponseWithdrawnReportModel = require('../apiResponseModel/APIResponseWithdrawnReportModel');
+const APIResponseRefundReportModel = require('../apiResponseModel/APIResponseRefundReportModel');
 const Utilities = require('../common/Utilities');
 const async = require("async");
 
@@ -377,16 +380,16 @@ module.exports.getPaypalReport = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  var response = new APIResponseRefundListModel();
+  var response = new APIResponsePaypalReportModel();
 
-  Refund.findAll('isApproved = :isApproved', {':isApproved': false}, null, 999, function(err, refundList) {
+  Transaction.findAll(null, null, null, 999, function(err, paypalList) {
 
     if (err) {
       callback(err, null);
       return;
     }
     response.statusCode = ServerConstant.API_CODE_OK;
-    Utilities.bind({refundList}, response);
+    Utilities.bind({paypalList}, response);
     callback(null, response);
   })
 };
@@ -395,16 +398,16 @@ module.exports.getWithdrawnReport = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  var response = new APIResponseRefundListModel();
+  var response = new APIResponseWithdrawnReportModel();
 
-  Refund.findAll('isApproved = :isApproved', {':isApproved': false}, null, 999, function(err, refundList) {
+  Withdrawn.findAll(null, null, null, 999, function(err, withdrawnList) {
 
     if (err) {
       callback(err, null);
       return;
     }
     response.statusCode = ServerConstant.API_CODE_OK;
-    Utilities.bind({refundList}, response);
+    Utilities.bind({withdrawnList}, response);
     callback(null, response);
   })
 };
@@ -413,9 +416,9 @@ module.exports.getRefundReport = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  var response = new APIResponseRefundListModel();
+  var response = new APIResponseRefundReportModel();
 
-  Refund.findAll('isApproved = :isApproved', {':isApproved': false}, null, 999, function(err, refundList) {
+  Refund.findAll(null, null, null, 999, function(err, refundList) {
 
     if (err) {
       callback(err, null);

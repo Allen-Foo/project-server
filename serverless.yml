@@ -464,3 +464,30 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  getPaypalReport:
+    handler: wallet/handler.getPaypalReport
+    events:
+      - http:
+          path: getPaypalReport
+          method: post
+          cors: true
+          integration: lambda
+
+  getWithdrawnReport:
+    handler: wallet/handler.getWithdrawnReport
+    events:
+      - http:
+          path: getWithdrawnReport
+          method: post
+          cors: true
+          integration: lambda
+
+  getRefundReport:
+    handler: wallet/handler.getRefundReport
+    events:
+      - http:
+          path: getRefundReport
+          method: post
+          cors: true
+          integration: lambda
