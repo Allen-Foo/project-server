@@ -87,9 +87,21 @@ module.exports.createTutor = (event, context, callback) => {
         callback(err, null);
         return;
       }
-      response.statusCode = ServerConstant.API_CODE_OK;
-      Utilities.bind(Tutor, response);
-      callback(null, response);
+
+      var newTutorInformation = new TutorInformation ();
+      Utilities.bind(data.tutorData, newTutorInformation);
+      Utilities.bind(newTutor, newTutorInformation);
+      
+      newTutorInformation.saveOrUpdate(function(err, Tutor) {
+        if (err) {
+          callback(err, null);
+          return;
+        }
+
+        response.statusCode = ServerConstant.API_CODE_OK;
+        Utilities.bind(Tutor, response);
+        callback(null, response);
+      })
     })
   });
 };
@@ -368,7 +380,7 @@ module.exports.deleteTutor = (event, context, callback) => {
 
   let response = new APIResponseUserModel();
 
-  User.findFirst('userId = :userId', {':userId' : userId}, function(err, tutor) {
+  User.findFirst('userId = :userId', {':userId' : userId}, function(err, user) {
 
     if (err) {
       callback(err, null);
@@ -377,14 +389,30 @@ module.exports.deleteTutor = (event, context, callback) => {
 
     // console.warn('classes', classes)
 
-    tutor.delete(function(error, res) {
+    user.delete(function(error, res) {
       if (error) {
         callback(error, null);
         return;
       }
-      response.statusCode = ServerConstant.API_CODE_OK;
-      Utilities.bind(tutor, response);
-      callback(null, response);
+
+      TutorInformation.findFirst('userId = :userId', {':userId' : userId}, function(err, tutor) {
+        if (err) {
+          callback(err, null);
+          return;
+        }
+
+        tutor.delete(function(error, res) {
+          if (error) {
+            callback(error, null);
+            return;
+          }
+          response.statusCode = ServerConstant.API_CODE_OK;
+          Utilities.bind(tutor, response);
+          callback(null, response);
+        })
+
+      })
+      
     })
   })
 };
