@@ -375,6 +375,15 @@ functions:
           cors: true
           integration: lambda
 
+  getCompanyDetail:
+    handler: company/handler.getCompanyDetail
+    events:
+      - http:
+          path: getCompanyDetail/{id}
+          method: post
+          cors: true
+          integration: lambda
+
   getProductList:
     handler: product/handler.getProductList
     events:
