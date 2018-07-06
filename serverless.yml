@@ -437,3 +437,30 @@ functions:
           method: post
           cors: true
           integration: lambda
+
+  getRefundList:
+    handler: wallet/handler.getRefundList
+    events:
+      - http:
+          path: getRefundList
+          method: post
+          cors: true
+          integration: lambda
+
+  applyRefund:
+    handler: wallet/handler.applyRefund
+    events:
+      - http:
+          path: applyRefund
+          method: post
+          cors: true
+          integration: lambda
+
+  approveRefund:
+    handler: wallet/handler.approveRefund
+    events:
+      - http:
+          path: approveRefund
+          method: post
+          cors: true
+          integration: lambda

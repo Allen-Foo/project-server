@@ -53,11 +53,13 @@ module.exports.applyClass = (event, context, callback) => {
         newApplyClass.address = classes.address;
         newApplyClass.time = classes.time;
         newApplyClass.title = classes.title;
+        newApplyClass.status = 'applied';
 
         let studentInfo =  classes.studentInfo || []
         studentInfo.push({
           applyId: newApplyClass.applyId,
           userId: data.userId,
+          status: 'applied',
         });
 
         //newApplyClass.classTimeList =
@@ -117,11 +119,13 @@ module.exports.updateApplyClassTable = (classId, userId, price, transactionId) =
           newApplyClass.time = classes.time;
           newApplyClass.title = classes.title;
           newApplyClass.transactionId = transactionId;
+          newApplyClass.status = 'applied';
 
           let studentInfo =  classes.studentInfo || []
           studentInfo.push({
             applyId: newApplyClass.applyId,
             userId: userId,
+            status: 'applied',
           });
 
           //newApplyClass.classTimeList =
@@ -163,6 +167,7 @@ module.exports.updateApplyClassTable = (classId, userId, price, transactionId) =
                   userId: userId,
                   payment: parseInt(price),
                   transactionId: transactionId,
+                  status: 'applied',
                 });
                 classCashBook.isDirty = true;
                 classCashBook.saveOrUpdate(function(err, classCashBook) {

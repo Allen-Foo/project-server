@@ -16,10 +16,10 @@ class ApplyClass extends Entity {
     this.tutorName = 'null';
     this.photoList = 'null';
     this.address = 'null';
-    this.classTimeList = [];
-    this.time = 'null';
+    this.time = [];
     this.title = 'null';
-    this.transactionId = 'null'; 
+    this.transactionId = 'null';
+    this.status = 'null';
   }
 }
 

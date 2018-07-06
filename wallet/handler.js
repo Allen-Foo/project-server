@@ -3,14 +3,21 @@ const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const User = require('../entity/User');
 const Withdrawn = require('../entity/Withdrawn');
+const Refund = require('../entity/Refund');
 const Product = require('../entity/Product');
 const CoinHistory = require('../entity/CoinHistory');
 const TutorInformation = require('../entity/TutorInformation');
 const ClassCashBook = require('../entity/ClassCashBook');
+const ApplyClass = require('../entity/ApplyClass');
+const Transaction = require('../entity/Transaction');
+const Class = require('../entity/Class');
 const APIResponseRevenueModel = require('../apiResponseModel/APIResponseRevenueModel');
 const APIResponseWithdrawnListModel = require('../apiResponseModel/APIResponseWithdrawnListModel');
 const APIResponseApplyWithdrawnModel = require('../apiResponseModel/APIResponseApplyWithdrawnModel');
 const APIResponseApproveWithdrawnModel = require('../apiResponseModel/APIResponseApproveWithdrawnModel');
+const APIResponseRefundListModel = require('../apiResponseModel/APIResponseRefundListModel');
+const APIResponseApplyRefundModel = require('../apiResponseModel/APIResponseApplyRefundModel');
+const APIResponseApproveRefundModel = require('../apiResponseModel/APIResponseApproveRefundModel');
 const Utilities = require('../common/Utilities');
 const async = require("async");
 
@@ -52,13 +59,23 @@ module.exports.getWalletRevenue = (event, context, callback) => {
             // Add Revenue
             if (classCashBookList[i].availableDate <= currentDate) {
               for (var j in classCashBookList[i].paymentList) {
-                  tutor.revenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee);
-                  classCashBookList[i].isOpen = false;
+                  if (paymentList[j].status == 'applied') {
+                    tutor.revenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee);
+                  }
+                  else {
+                    tutor.revenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee) - classCashBookList[i].paymentList[j].refundAmount;
+                  }
               }
+              classCashBookList[i].isOpen = false;
             }
             else {
               for (var j in classCashBookList[i].paymentList) {
-                  pendingRevenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee);
+                  if (paymentList[j].status == 'applied') {
+                    pendingRevenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee);
+                  }
+                  else {
+                    pendingRevenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee) - classCashBookList[i].paymentList[j].refundAmount;
+                  }
               }
             }
             classCashBookList[i].isDirty = false;
@@ -189,5 +206,223 @@ module.exports.approveWithdrawn = (event, context, callback) => {
       response.statusCode = ServerConstant.API_CODE_OK;
       callback(null, response);
     })
+  })
+};
+
+module.exports.applyRefund = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  var response = new APIResponseApplyRefundModel();
+
+  if (!data.userId || !data.applyId || !data.reason) {
+    response.statusCode = ServerConstant.API_CODE_INVALID_PARAMS;
+    callback(null, response);
+    return;
+  }
+  User.findFirst ('userId = :userId', {':userId' : data.userId}, function(err, user) {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    ApplyClass.findFirst ('applyId = :applyId', {':applyId' : data.applyId}, function(err, applyClass) {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+      Transaction.findFirst ('transactionId = :transactionId', {':transactionId' : applyClass.transactionId}, function(err, transaction) {
+        if (err) {
+          callback(err, null);
+          return;
+        }
+        if (!transaction || applyClass.status != 'applied') {
+          response.statusCode = ServerConstant.API_CODE_CANNOT_REFUND;
+          Utilities.bind(user, response);
+          callback(null, response);
+          return;
+        }
+        applyClass.status = 'refunding';
+
+        Class.findFirst('classId = :classId', {':classId' : applyClass.classId}, function(err, classes) {
+          if (err) {
+            callback(err, null);
+            return;
+          }
+          let studentInfo =  classes.studentInfo || []
+          studentInfo.forEach(function (element, index, array) {
+              if (element.applyId == applyClass.applyId) {
+                array[index].status = 'refunding';
+              }
+          })
+          classes.numberOfStudent -= 1;
+          classes.studentInfo = studentInfo;
+          ClassCashBook.findFirst('classId = :classId', {':classId' : applyClass.classId}, function(err, classCashBook) {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+            var refundFee = 0.05;
+            var tmpDateArray = Object.keys(classes.time);
+            tmpDateArray.forEach(function(part, index, theArray) {
+              theArray[index] = new Date (part)
+            });
+            var tmpDate = new Date(Math.min(...tmpDateArray));
+            tmpDate.setDate (new Date(Date.now()).getDate() - tmpDate.getDate());
+            if (tmpDate <= Utilities.THE_DAYS_CANNOT_REFUND) {
+              response.statusCode = ServerConstant.API_CODE_CANNOT_REFUND;
+              Utilities.bind(user, response);
+              callback(null, response);
+              return;
+            }
+            else if (tmpDate <= Utilities.THE_DAYS_CAN_REFUND_WITH_50_PERCENT_FEE) {
+              refundFee = 0.5;
+            }
+
+            var refund = new Refund();
+            refund.refundId = uuidv4();
+            refund.name = user.name;
+            refund.paypalAccount = transaction.payer.payer_info.email;
+            refund.className = applyClass.className;
+            refund.tutorName = applyClass.tutorName;
+            refund.reason = data.reason;
+            refund.amount = transaction.amount * (1-refundFee);
+            refund.createdAt = Utilities.getCurrentTime();
+            refund.isApproved = false;
+            refund.transactionId = transaction.transactionId;
+
+            let paymentList =  classCashBook.paymentList || []
+            paymentList.forEach(function (element, index, array) {
+                if (element.transactionId == transaction.transactionId) {
+                  array[index].status = 'refunding';
+                  array[index].refundId = refund.refundId;
+                  array[index].refundAmount = transaction.amount * (1-refundFee);
+                }
+            })
+            classCashBook.paymentList = paymentList;
+            classCashBook.isDirty = true;
+
+            applyClass.saveOrUpdate (function(err, applyClass) {
+              if (err) {
+                callback(err, null);
+                return;
+              }
+              classes.saveOrUpdate (function(err, classes) {
+                if (err) {
+                  callback(err, null);
+                  return;
+                }
+                classCashBook.saveOrUpdate (function(err, classCashBook) {
+                  if (err) {
+                    callback(err, null);
+                    return;
+                  }
+                  refund.saveOrUpdate(function(err, refund) {
+                    if (err) {
+                      callback(err, null);
+                      return;
+                    }
+                    response.statusCode = ServerConstant.API_CODE_OK;
+                    Utilities.bind(user, response);
+                    callback(null, response);
+                  })
+                })
+              })
+            })
+          })
+        })
+      })
+    });
+  });
+};
+
+module.exports.getRefundList = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  var response = new APIResponseRefundListModel();
+
+  Refund.findAll('isApproved = :isApproved', {':isApproved': false}, null, 999, function(err, refundList) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind({refundList}, response);
+    callback(null, response);
+  })
+};
+
+module.exports.approveRefund = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  var response = new APIResponseApproveRefundModel();
+
+  Refund.findFirst('refundId = :refundId', {':refundId' : data.refundId}, function(err, refund) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    refund.isApproved = true;
+    refund.saveOrUpdate(function(err,withdrawn){
+      response.statusCode = ServerConstant.API_CODE_OK;
+      callback(null, response);
+    })
+  })
+};
+
+module.exports.getPaypalReport = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  var response = new APIResponseRefundListModel();
+
+  Refund.findAll('isApproved = :isApproved', {':isApproved': false}, null, 999, function(err, refundList) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind({refundList}, response);
+    callback(null, response);
+  })
+};
+
+module.exports.getWithdrawnReport = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  var response = new APIResponseRefundListModel();
+
+  Refund.findAll('isApproved = :isApproved', {':isApproved': false}, null, 999, function(err, refundList) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind({refundList}, response);
+    callback(null, response);
+  })
+};
+
+module.exports.getRefundReport = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+
+  var response = new APIResponseRefundListModel();
+
+  Refund.findAll('isApproved = :isApproved', {':isApproved': false}, null, 999, function(err, refundList) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind({refundList}, response);
+    callback(null, response);
   })
 };

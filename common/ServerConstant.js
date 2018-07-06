@@ -29,8 +29,13 @@ const ServerConstant = {
   // withdrawn error
   API_CODE_INSUFFICIENT_BALANCE: 601,
 
+  // refund error
+  API_CODE_CANNOT_REFUND: 651,
+
   // Common constant
-  THE_DAYS_CAN_GET_THE_REVENUE: 7
+  THE_DAYS_CAN_GET_THE_REVENUE: 7,
+  THE_DAYS_CAN_REFUND_WITH_50_PERCENT_FEE: 7,
+  THE_DAYS_CANNOT_REFUND: 1
 }
 
 module.exports = ServerConstant;
