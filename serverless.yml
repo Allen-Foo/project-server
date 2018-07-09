@@ -379,7 +379,7 @@ functions:
     handler: company/handler.getCompanyDetail
     events:
       - http:
-          path: getCompanyDetail/{id}
+          path: getCompanyDetail
           method: post
           cors: true
           integration: lambda
