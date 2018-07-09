@@ -15,6 +15,10 @@ class Transaction extends Entity {
     this.paymentMethod = 'null';
     this.type = 'null';
     this.createdAt = 'null';
+    this.name = 'null';
+    this.tutorName = 'null';
+    this.className = 'null';
+    this.applyId = 'null';
   }
 }
 

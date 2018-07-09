@@ -3,8 +3,9 @@ const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
 const User = require('../entity/User');
-const ApplyClass = require('../entity/ApplyClass')
-const ClassCashBook = require('../entity/ClassCashBook')
+const ApplyClass = require('../entity/ApplyClass');
+const ClassCashBook = require('../entity/ClassCashBook');
+const Transaction = require('../entity/Transaction');
 const APIResponseAppliedClassModel = require('../apiResponseModel/APIResponseAppliedClassModel');
 const APIResponseAppliedClassListModel = require('../apiResponseModel/APIResponseAppliedClassListModel');
 const Utilities = require('../common/Utilities');
@@ -111,9 +112,9 @@ module.exports.updateApplyClassTable = (classId, userId, price, transactionId) =
           newApplyClass.className = classes.title;
           newApplyClass.registerAt = Utilities.getCurrentTime();
           newApplyClass.userId = userId;
-          newApplyClass.userName = student.username;
+          newApplyClass.userName = student.name;
           newApplyClass.tutorId = classes.userId;
-          newApplyClass.tutorName = tutor.username;
+          newApplyClass.tutorName = tutor.name;
           newApplyClass.photoList = classes.photoList;
           newApplyClass.address = classes.address;
           newApplyClass.time = classes.time;
@@ -128,57 +129,71 @@ module.exports.updateApplyClassTable = (classId, userId, price, transactionId) =
             status: 'applied',
           });
 
-          //newApplyClass.classTimeList =
-          newApplyClass.saveOrUpdate(function(err, applyClass) {
+          Transaction.findFirst('transactionId = :transactionId', {':transactionId' : transactionId}, function(err, transaction) {
             if (err) {
               reject(err);
             }
-
-            classes.numberOfStudent += 1;
-            classes.studentInfo = studentInfo;
-            classes.user = tutor
-
-            classes.saveOrUpdate(function(err, classes) {
+            transaction.applyId = newApplyClass.applyId;
+            transaction.tutorName = tutor.name;
+            transaction.name = student.name;
+            transaction.className = classes.title;
+            transaction.saveOrUpdate(function(err, transaction) {
               if (err) {
                 reject(err);
               }
-
-              ClassCashBook.findFirst ('classId = :classId', {':classId' : classId}, function(err, classCashBook) {
+              //newApplyClass.classTimeList =
+              newApplyClass.saveOrUpdate(function(err, applyClass) {
                 if (err) {
                   reject(err);
                 }
 
-                if (!classCashBook) {
-                  var classCashBook = new ClassCashBook();
-                  classCashBook.classCashBookId = uuidv4();
-                  classCashBook.userId = classes.userId;
-                  classCashBook.classId = classes.classId;
-                  var tmpDateArray = Object.keys(classes.time);
-                  tmpDateArray.forEach(function(part, index, theArray) {
-                    theArray[index] = new Date (part)
-                  });
-                  var tmpDate = new Date(Math.max(...tmpDateArray));
-                  tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
-                  classCashBook.availableAt = tmpDate.toString();
-                  classCashBook.availableDate = Date.parse(tmpDate);
-                }
-                let paymentList = classCashBook.paymentList || []
-                paymentList.push({
-                  userId: userId,
-                  payment: parseInt(price),
-                  transactionId: transactionId,
-                  status: 'applied',
-                });
-                classCashBook.isDirty = true;
-                classCashBook.saveOrUpdate(function(err, classCashBook) {
+                classes.numberOfStudent += 1;
+                classes.studentInfo = studentInfo;
+                classes.user = tutor
+
+                classes.saveOrUpdate(function(err, classes) {
                   if (err) {
                     reject(err);
                   }
-                  resolve('success')
+
+                  ClassCashBook.findFirst ('classId = :classId', {':classId' : classId}, function(err, classCashBook) {
+                    if (err) {
+                      reject(err);
+                    }
+
+                    if (!classCashBook) {
+                      var classCashBook = new ClassCashBook();
+                      classCashBook.classCashBookId = uuidv4();
+                      classCashBook.userId = classes.userId;
+                      classCashBook.classId = classes.classId;
+                      var tmpDateArray = Object.keys(classes.time);
+                      tmpDateArray.forEach(function(part, index, theArray) {
+                        theArray[index] = new Date (part)
+                      });
+                      var tmpDate = new Date(Math.max(...tmpDateArray));
+                      tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
+                      classCashBook.availableAt = tmpDate.toString();
+                      classCashBook.availableDate = Date.parse(tmpDate);
+                    }
+                    let paymentList = classCashBook.paymentList || []
+                    paymentList.push({
+                      userId: userId,
+                      payment: parseInt(price),
+                      transactionId: transactionId,
+                      status: 'applied',
+                    });
+                    classCashBook.isDirty = true;
+                    classCashBook.saveOrUpdate(function(err, classCashBook) {
+                      if (err) {
+                        reject(err);
+                      }
+                      resolve('success')
+                    })
+                  })
                 })
-              })
+              });
             })
-          });
+          })
         });
       })
     })
