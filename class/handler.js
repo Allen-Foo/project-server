@@ -43,6 +43,7 @@ module.exports.createClass = (event, context, callback) => {
     var tmpDate = new Date(Math.max(...tmpDateArray));
     tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
     classCashBook.availableAt = tmpDate.toString();
+    classCashBook.availableDate = Date.parse(tmpDate);
     classCashBook.saveOrUpdate(function(err, classCashBook) {
       if (err) {
         callback(err, null);

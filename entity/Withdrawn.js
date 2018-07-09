@@ -10,9 +10,14 @@ class Withdrawn extends Entity {
     this.tutorName = 'null';
     this.bankName = 'null';
     this.bankAccount = 'null';
-    this.amount = 0;
+    this.bankAccountName = 'null';
     this.createdAt = '';
     this.isApproved = false;
+    this.requestAmount = 0;
+    this.withdrawnAmount = 0;
+    this.adminFeeRate = 0;
+    this.adminFee = 0;
+    this.remainRevenue = 0;
 
   }
 }

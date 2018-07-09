@@ -57,16 +57,15 @@ module.exports.getWalletRevenue = (event, context, callback) => {
           }
 
           var pendingRevenue = 0;
-          var chargeFee = 0.05;
           for (var i in classCashBookList) {
             // Add Revenue
             if (classCashBookList[i].availableDate <= currentDate) {
               for (var j in classCashBookList[i].paymentList) {
                   if (paymentList[j].status == 'applied') {
-                    tutor.revenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee);
+                    tutor.revenue += classCashBookList[i].paymentList[j].payment;
                   }
                   else {
-                    tutor.revenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee) - classCashBookList[i].paymentList[j].refundAmount;
+                    tutor.revenue += classCashBookList[i].paymentList[j].payment - classCashBookList[i].paymentList[j].refundAmount;
                   }
               }
               classCashBookList[i].isOpen = false;
@@ -74,10 +73,10 @@ module.exports.getWalletRevenue = (event, context, callback) => {
             else {
               for (var j in classCashBookList[i].paymentList) {
                   if (paymentList[j].status == 'applied') {
-                    pendingRevenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee);
+                    pendingRevenue += classCashBookList[i].paymentList[j].payment;
                   }
                   else {
-                    pendingRevenue += classCashBookList[i].paymentList[j].payment * (1-chargeFee) - classCashBookList[i].paymentList[j].refundAmount;
+                    pendingRevenue += classCashBookList[i].paymentList[j].payment - classCashBookList[i].paymentList[j].refundAmount;
                   }
               }
             }
@@ -132,7 +131,7 @@ module.exports.applyWithdrawn = (event, context, callback) => {
 
   var response = new APIResponseApplyWithdrawnModel();
 
-  if (!data.userId || !data.bankAccount || !data.bankName || !data.amount || isNaN(data.amount) || data.amount <= 0) {
+  if (!data.userId || !data.bankAccount || !data.bankName || !data.bankAccountName || !data.amount || isNaN(data.amount) || data.amount <= 0) {
     response.statusCode = ServerConstant.API_CODE_INVALID_PARAMS;
     callback(null, response);
     return;
@@ -152,6 +151,13 @@ module.exports.applyWithdrawn = (event, context, callback) => {
           callback(null, response);
         }
         else {
+          var adminFeeRate = 0.1;
+          if (tutor.revenue - data.amount > 0) {
+            adminFeeRate = 0.1;
+          }
+          else if (tutor.revenue - data.amount > 100) {
+            //TODO
+          }
           tutor.revenue -= data.amount;
           tutor.saveOrUpdate(function(err,tutor){
             var withdrawn = new Withdrawn();
@@ -160,7 +166,12 @@ module.exports.applyWithdrawn = (event, context, callback) => {
             withdrawn.tutorName = user.name;
             withdrawn.bankName = data.bankName;
             withdrawn.bankAccount = data.bankAccount;
-            withdrawn.amount = data.amount;
+            withdrawn.bankAccountName = data.bankAccountName;
+            withdrawn.requestAmount = data.amount;
+            withdrawn.withdrawnAmount = data.amount * (1 - adminFeeRate);
+            withdrawn.adminFeeRate = adminFeeRate;
+            withdrawn.adminFee = data.amount * adminFeeRate;
+            withdrawn.remainRevenue = tutor.revenue - data.amount;
             withdrawn.createdAt = Utilities.getCurrentTime();
             withdrawn.isApproved = false;
             withdrawn.saveOrUpdate(function(err,tutor){
@@ -264,7 +275,8 @@ module.exports.applyRefund = (event, context, callback) => {
               callback(err, null);
               return;
             }
-            var refundFee = 0.05;
+            var refundRate = 1;
+            var adminFeeRate = 0.05;
             var tmpDateArray = Object.keys(classes.time);
             tmpDateArray.forEach(function(part, index, theArray) {
               theArray[index] = new Date (part)
@@ -278,7 +290,7 @@ module.exports.applyRefund = (event, context, callback) => {
               return;
             }
             else if (tmpDate <= Utilities.THE_DAYS_CAN_REFUND_WITH_50_PERCENT_FEE) {
-              refundFee = 0.5;
+              refundRate = 0.5;
             }
 
             var refund = new Refund();
@@ -288,7 +300,12 @@ module.exports.applyRefund = (event, context, callback) => {
             refund.className = applyClass.className;
             refund.tutorName = applyClass.tutorName;
             refund.reason = data.reason;
-            refund.amount = transaction.amount * (1-refundFee);
+            refund.refundRate = refundRate;
+            refund.adminFeeRate = adminFeeRate;
+            refund.adminFee = transaction.amount * adminFeeRate;
+            refund.classFee = transaction.amount;
+            refund.requestAmount = transaction.amount * refundRate;
+            refund.refundAmount = transaction.amount * (refundRate - adminFeeRate);
             refund.createdAt = Utilities.getCurrentTime();
             refund.isApproved = false;
             refund.transactionId = transaction.transactionId;
@@ -298,7 +315,7 @@ module.exports.applyRefund = (event, context, callback) => {
                 if (element.transactionId == transaction.transactionId) {
                   array[index].status = 'refunding';
                   array[index].refundId = refund.refundId;
-                  array[index].refundAmount = transaction.amount * (1-refundFee);
+                  array[index].refundAmount = transaction.amount * refundRate;
                 }
             })
             classCashBook.paymentList = paymentList;
