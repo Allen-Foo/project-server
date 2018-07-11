@@ -12,7 +12,7 @@ class Refund extends Entity {
     this.tutorName = 'null';
     this.reason = 'null';
     this.createdAt = 'null';
-    this.isApproved = false;
+    this.status = 'processing';
     this.transactionId = 'null';
     this.refundRate = 0;
     this.adminFeeRate = 0;

@@ -158,17 +158,17 @@ module.exports.getCoinHistoryList = (event, context, callback) => {
   let lastEvaluatedKey = data && data.lastStartKey ?  {productId: data.lastStartKey} : null;
   let isLastRecord = false;
 
-  CoinHistory.findAll('userId = :userId', {':userId' : data.userId}, lastEvaluatedKey, 10, function(err, coinHistory) {
+  CoinHistory.findAll('userId = :userId', {':userId' : data.userId}, lastEvaluatedKey, 10, function(err, coinHistoryList) {
 
     if (err) {
       callback(err, null);
       return;
     }
-    if (coinHistory.length < 10){
+    if (coinHistoryList.length < 10){
       isLastRecord = true
     }
     response.statusCode = ServerConstant.API_CODE_OK;
-    Utilities.bind({coinHistory}, response);
+    Utilities.bind({coinHistoryList}, response);
     response.isLastRecord = isLastRecord;
     callback(null, response);
   })

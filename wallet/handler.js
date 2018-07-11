@@ -173,7 +173,7 @@ module.exports.applyWithdrawn = (event, context, callback) => {
             withdrawn.adminFee = data.amount * adminFeeRate;
             withdrawn.remainRevenue = tutor.revenue - data.amount;
             withdrawn.createdAt = Utilities.getCurrentTime();
-            withdrawn.isApproved = false;
+            withdrawn.status = 'processing';
             withdrawn.saveOrUpdate(function(err,tutor){
               response.statusCode = ServerConstant.API_CODE_OK;
               Utilities.bind(tutor, response);
@@ -191,7 +191,7 @@ module.exports.getWithdrawnList = (event, context, callback) => {
 
   var response = new APIResponseWithdrawnListModel();
 
-  Withdrawn.findAll('isApproved = :isApproved', {':isApproved': false}, null, 999, function(err, withdrawnList) {
+  Withdrawn.findAll('status = :status', {':status': 'processing'}, null, 999, function(err, withdrawnList) {
 
     if (err) {
       callback(err, null);
@@ -215,7 +215,7 @@ module.exports.approveWithdrawn = (event, context, callback) => {
       callback(err, null);
       return;
     }
-    withdrawn.isApproved = true;
+    withdrawn.status = 'approved';
     withdrawn.saveOrUpdate(function(err,withdrawn){
       response.statusCode = ServerConstant.API_CODE_OK;
       callback(null, response);
@@ -307,7 +307,7 @@ module.exports.applyRefund = (event, context, callback) => {
             refund.requestAmount = transaction.amount * refundRate;
             refund.refundAmount = transaction.amount * (refundRate - adminFeeRate);
             refund.createdAt = Utilities.getCurrentTime();
-            refund.isApproved = false;
+            refund.status = 'processing';
             refund.transactionId = transaction.transactionId;
 
             let paymentList =  classCashBook.paymentList || []
@@ -361,7 +361,7 @@ module.exports.getRefundList = (event, context, callback) => {
 
   var response = new APIResponseRefundListModel();
 
-  Refund.findAll('isApproved = :isApproved', {':isApproved': false}, null, 999, function(err, refundList) {
+  Refund.findAll('status = :status', {':status': 'processing'}, null, 999, function(err, refundList) {
 
     if (err) {
       callback(err, null);
@@ -385,7 +385,7 @@ module.exports.approveRefund = (event, context, callback) => {
       callback(err, null);
       return;
     }
-    refund.isApproved = true;
+    refund.status = 'approved';
     refund.saveOrUpdate(function(err,withdrawn){
       response.statusCode = ServerConstant.API_CODE_OK;
       callback(null, response);
