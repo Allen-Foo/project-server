@@ -37,9 +37,9 @@ const ServerConstant = {
   // Common constant
   THE_DAYS_CAN_GET_THE_REVENUE: 7,
   THE_DAYS_CAN_REFUND_WITH_50_PERCENT_FEE: 7,
-  THE_DAYS_CANNOT_REFUND: 1
+  THE_DAYS_CANNOT_REFUND: 1,
 
-  CREATE_CLASS_COINS = 30;
+  CREATE_CLASS_COINS = 30
 }
 
 module.exports = ServerConstant;
