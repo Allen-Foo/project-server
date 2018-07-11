@@ -13,7 +13,7 @@ class Transaction extends Entity {
     this.sku = 'null';
     this.amount = 0;
     this.paymentMethod = 'null';
-    this.type = 'null';
+    this.productType = 'null';
     this.createdAt = 'null';
     this.name = 'null';
     this.tutorName = 'null';

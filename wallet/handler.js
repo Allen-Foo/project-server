@@ -426,7 +426,7 @@ module.exports.getPaypalReport = (event, context, callback) => {
 
   var response = new APIResponsePaypalReportModel();
 
-  Transaction.findAll('type = :type', {':type' : 'class'}, null, 999, function(err, paypalList) {
+  Transaction.findAll('productType = :productType', {':productType' : 'class'}, null, 999, function(err, paypalList) {
 
     if (err) {
       callback(err, null);

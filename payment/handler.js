@@ -126,7 +126,7 @@ module.exports.paymentSuccess = (event, context, callback) => {
     transaction.amount = price;
     transaction.paymentMethod = 'Paypal';
     transaction.createdAt = Utilities.getCurrentTime();
-    transaction.type = productType;
+    transaction.productType = productType;
     transaction.saveOrUpdate(function (err, transaction) {
       if (err) {
         callback(err, null);
