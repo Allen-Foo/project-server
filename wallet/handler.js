@@ -21,6 +21,7 @@ const APIResponseApproveRefundModel = require('../apiResponseModel/APIResponseAp
 const APIResponsePaypalReportModel = require('../apiResponseModel/APIResponsePaypalReportModel');
 const APIResponseWithdrawnReportModel = require('../apiResponseModel/APIResponseWithdrawnReportModel');
 const APIResponseRefundReportModel = require('../apiResponseModel/APIResponseRefundReportModel');
+const APIResponseWithdrawnRecordModel = require('../apiResponseModel/APIResponseWithdrawnRecordModel');
 const Utilities = require('../common/Utilities');
 const async = require("async");
 
@@ -184,6 +185,32 @@ module.exports.applyWithdrawn = (event, context, callback) => {
     });
   });
 };
+
+module.exports.getWithdrawnRecord = (event, context, callback) => {
+  // get data from the body of event
+  const data = event.body;
+  let lastEvaluatedKey = data && data.lastStartKey ?  {withdrawnId: data.lastStartKey} : null;
+
+  var response = new APIResponseWithdrawnRecordModel();
+
+  Withdrawn.findAll('userId = :userId', {':userId': data.userId}, lastEvaluatedKey, 20, function(err, withdrawnList) {
+
+    if (err) {
+      callback(err, null);
+      return;
+    }
+
+    let isLastRecord = false;
+    if (withdrawnList.length < 20){
+      isLastRecord = true
+    }
+    response.statusCode = ServerConstant.API_CODE_OK;
+    Utilities.bind({withdrawnList}, response);
+    response.isLastRecord = isLastRecord;
+    callback(null, response);
+
+  })
+}
 
 module.exports.getWithdrawnList = (event, context, callback) => {
   // get data from the body of event

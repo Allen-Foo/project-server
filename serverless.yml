@@ -420,6 +420,15 @@ functions:
           cors: true
           integration: lambda
 
+  getWithdrawnRecord:
+    handler: wallet/handler.getWithdrawnRecord
+    events:
+      - http:
+          path: getWithdrawnRecord
+          method: post
+          cors: true
+          integration: lambda
+    
   getWithdrawnList:
     handler: wallet/handler.getWithdrawnList
     events:
