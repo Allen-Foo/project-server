@@ -1,8 +1,8 @@
 'use strict';
 const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
-const User = require('../entity/User');
 const Class = require('../entity/Class');
+const User = require('../entity/User');
 const CoinHistory = require('../entity/CoinHistory');
 const ClassCashBook = require('../entity/ClassCashBook');
 const APIResponseClassModel = require('../apiResponseModel/APIResponseClassModel');
