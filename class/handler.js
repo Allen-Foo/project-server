@@ -2,7 +2,8 @@
 const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const Class = require('../entity/Class');
-const User = require('../entity/User');
+const CoinHistory = require('../entity/CoinHistory');
+const TutorInformation = require('../entity/TutorInformation');
 const ClassCashBook = require('../entity/ClassCashBook');
 const APIResponseClassModel = require('../apiResponseModel/APIResponseClassModel');
 const APIResponseClassListModel = require('../apiResponseModel/APIResponseClassListModel');
@@ -21,38 +22,56 @@ module.exports.createClass = (event, context, callback) => {
     return;
   }
 
-  // check duplicate email
-  let newClass = new Class();
-  Utilities.bind(data, newClass);
-  newClass.createdAt = Utilities.getCurrentTime();
-  newClass.classId = uuidv4();
-  newClass.saveOrUpdate(function(err, res) {
+  User.findFirst('userId = :userId', {':userId' : data.userId}, function(err, user) {
     if (err) {
       callback(err, null);
       return;
     }
-
-    var classCashBook = new ClassCashBook();
-    classCashBook.classCashBookId = uuidv4();
-    classCashBook.userId = res.userId;
-    classCashBook.classId = res.classId;
-    var tmpDateArray = Object.keys(res.time);
-    tmpDateArray.forEach(function(part, index, theArray) {
-      theArray[index] = new Date (part)
-    });
-    var tmpDate = new Date(Math.max(...tmpDateArray));
-    tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
-    classCashBook.availableAt = tmpDate.toString();
-    classCashBook.availableDate = Date.parse(tmpDate);
-    classCashBook.saveOrUpdate(function(err, classCashBook) {
-      if (err) {
-        callback(err, null);
-        return;
-      }
-
-      response.statusCode = ServerConstant.API_CODE_OK;
-      Utilities.bind(res, response);
+    if (tutor.gold + tutor.freeGold < ServerConstant.CREATE_CLASS_COINS) {
+      response.statusCode = ServerConstant.API_CODE_CLASS_LACK_OF_COINS;
       callback(null, response);
+      return;
+    }
+    var tmp = user.freeGold - ServerConstant.CREATE_CLASS_COINS;
+    user.freeGold = Math.max(0, tmp);
+    if (tmp < 0) {
+      user.gold += tmp;
+    }
+
+    user.saveOrUpdate(function(err, user) {
+      // check duplicate email
+      let newClass = new Class();
+      Utilities.bind(data, newClass);
+      newClass.createdAt = Utilities.getCurrentTime();
+      newClass.classId = uuidv4();
+      newClass.saveOrUpdate(function(err, res) {
+        if (err) {
+          callback(err, null);
+          return;
+        }
+
+        var classCashBook = new ClassCashBook();
+        classCashBook.classCashBookId = uuidv4();
+        classCashBook.userId = res.userId;
+        classCashBook.classId = res.classId;
+        var tmpDateArray = Object.keys(res.time);
+        tmpDateArray.forEach(function(part, index, theArray) {
+          theArray[index] = new Date (part)
+        });
+        var tmpDate = new Date(Math.max(...tmpDateArray));
+        tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
+        classCashBook.availableAt = tmpDate.toString();
+        classCashBook.availableDate = Date.parse(tmpDate);
+        classCashBook.saveOrUpdate(function(err, classCashBook) {
+          if (err) {
+            callback(err, null);
+            return;
+          }
+          response.statusCode = ServerConstant.API_CODE_OK;
+          Utilities.bind(res, response);
+          callback(null, response);
+        });
+      });
     });
   });
 };

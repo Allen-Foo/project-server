@@ -23,6 +23,8 @@ const ServerConstant = {
 
   API_CODE_ACC_UNAUTHORIZED: 401,
 
+  // create class error
+  API_CODE_CLASS_LACK_OF_COINS: 451,
   // product error
   API_CODE_PRODUCT_NOT_FOUND: 501,
 
@@ -36,6 +38,8 @@ const ServerConstant = {
   THE_DAYS_CAN_GET_THE_REVENUE: 7,
   THE_DAYS_CAN_REFUND_WITH_50_PERCENT_FEE: 7,
   THE_DAYS_CANNOT_REFUND: 1
+
+  CREATE_CLASS_COINS = 30;
 }
 
 module.exports = ServerConstant;
