@@ -27,7 +27,7 @@ module.exports.createClass = (event, context, callback) => {
       callback(err, null);
       return;
     }
-    if (tutor.gold + tutor.freeGold < ServerConstant.CREATE_CLASS_COINS) {
+    if (user.gold + user.freeGold < ServerConstant.CREATE_CLASS_COINS) {
       response.statusCode = ServerConstant.API_CODE_CLASS_LACK_OF_COINS;
       callback(null, response);
       return;

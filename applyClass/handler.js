@@ -54,7 +54,7 @@ module.exports.applyClass = (event, context, callback) => {
         newApplyClass.address = classes.address;
         newApplyClass.time = classes.time;
         newApplyClass.title = classes.title;
-        newApplyClass.status = 'applied';
+        newApplyClass.progress = 'applied';
 
         let studentInfo =  classes.studentInfo || []
         studentInfo.push({
@@ -120,7 +120,7 @@ module.exports.updateApplyClassTable = (classId, userId, price, transactionId) =
           newApplyClass.time = classes.time;
           newApplyClass.title = classes.title;
           newApplyClass.transactionId = transactionId;
-          newApplyClass.status = 'applied';
+          newApplyClass.progress = 'applied';
 
           let studentInfo =  classes.studentInfo || []
           studentInfo.push({

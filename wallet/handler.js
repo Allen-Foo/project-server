@@ -173,7 +173,7 @@ module.exports.applyWithdrawn = (event, context, callback) => {
             withdrawn.adminFee = data.amount * adminFeeRate;
             withdrawn.remainRevenue = tutor.revenue - data.amount;
             withdrawn.createdAt = Utilities.getCurrentTime();
-            withdrawn.status = 'processing';
+            withdrawn.progress = 'processing';
             withdrawn.saveOrUpdate(function(err,tutor){
               response.statusCode = ServerConstant.API_CODE_OK;
               Utilities.bind(tutor, response);
@@ -191,7 +191,7 @@ module.exports.getWithdrawnList = (event, context, callback) => {
 
   var response = new APIResponseWithdrawnListModel();
 
-  Withdrawn.findAll('status = :status', {':status': 'processing'}, null, 999, function(err, withdrawnList) {
+  Withdrawn.findAll('progress = :progress', {':progress': 'processing'}, null, 999, function(err, withdrawnList) {
 
     if (err) {
       callback(err, null);
@@ -215,7 +215,7 @@ module.exports.approveWithdrawn = (event, context, callback) => {
       callback(err, null);
       return;
     }
-    withdrawn.status = 'approved';
+    withdrawn.progress = 'approved';
     withdrawn.saveOrUpdate(function(err,withdrawn){
       response.statusCode = ServerConstant.API_CODE_OK;
       callback(null, response);
@@ -249,13 +249,13 @@ module.exports.applyRefund = (event, context, callback) => {
           callback(err, null);
           return;
         }
-        if (!transaction || applyClass.status != 'applied') {
+        if (!transaction || applyClass.progress != 'applied') {
           response.statusCode = ServerConstant.API_CODE_CANNOT_REFUND;
           Utilities.bind(user, response);
           callback(null, response);
           return;
         }
-        applyClass.status = 'refunding';
+        applyClass.progress = 'refunding';
 
         Class.findFirst('classId = :classId', {':classId' : applyClass.classId}, function(err, classes) {
           if (err) {
@@ -307,7 +307,7 @@ module.exports.applyRefund = (event, context, callback) => {
             refund.requestAmount = transaction.amount * refundRate;
             refund.refundAmount = transaction.amount * (refundRate - adminFeeRate);
             refund.createdAt = Utilities.getCurrentTime();
-            refund.status = 'processing';
+            refund.progress = 'processing';
             refund.transactionId = transaction.transactionId;
 
             let paymentList =  classCashBook.paymentList || []
@@ -361,7 +361,7 @@ module.exports.getRefundList = (event, context, callback) => {
 
   var response = new APIResponseRefundListModel();
 
-  Refund.findAll('status = :status', {':status': 'processing'}, null, 999, function(err, refundList) {
+  Refund.findAll('progress = :progress', {':progress': 'processing'}, null, 999, function(err, refundList) {
 
     if (err) {
       callback(err, null);
@@ -385,7 +385,7 @@ module.exports.approveRefund = (event, context, callback) => {
       callback(err, null);
       return;
     }
-    refund.status = 'approved';
+    refund.progress = 'approved';
     refund.saveOrUpdate(function(err,withdrawn){
       response.statusCode = ServerConstant.API_CODE_OK;
       callback(null, response);

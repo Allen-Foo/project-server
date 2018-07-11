@@ -19,7 +19,7 @@ class ApplyClass extends Entity {
     this.time = [];
     this.title = 'null';
     this.transactionId = 'null';
-    this.status = 'null';
+    this.progress = 'null';
   }
 }
 

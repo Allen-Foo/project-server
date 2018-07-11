@@ -12,7 +12,7 @@ class Withdrawn extends Entity {
     this.bankAccount = 'null';
     this.bankAccountName = 'null';
     this.createdAt = '';
-    this.isApproved = false;
+    this.progress = 'processing';
     this.requestAmount = 0;
     this.withdrawnAmount = 0;
     this.adminFeeRate = 0;
