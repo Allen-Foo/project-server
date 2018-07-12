@@ -7,13 +7,14 @@ const CoinHistory = require('../entity/CoinHistory');
 const ClassCashBook = require('../entity/ClassCashBook');
 const APIResponseClassModel = require('../apiResponseModel/APIResponseClassModel');
 const APIResponseClassListModel = require('../apiResponseModel/APIResponseClassListModel');
+const APIResponseCreateClassModel = require('../apiResponseModel/APIResponseCreateClassModel');
 const Utilities = require('../common/Utilities');
 
 module.exports.createClass = (event, context, callback) => {
   // get data from the body of event
   const data = event.body;
 
-  let response = new APIResponseClassListModel();
+  let response = new APIResponseCreateClassModel();
 
   // check userId valid
   if (!data.userId) {
@@ -42,37 +43,53 @@ module.exports.createClass = (event, context, callback) => {
     }
 
     user.saveOrUpdate(function(err, user) {
-      // check duplicate email
-      let newClass = new Class();
-      Utilities.bind(data, newClass);
-      newClass.createdAt = Utilities.getCurrentTime();
-      newClass.classId = uuidv4();
-      newClass.saveOrUpdate(function(err, res) {
+
+      var coinHistory = new CoinHistory();
+      coinHistory.userId = user.userId;
+      coinHistory.coinHistoryId = uuidv4();
+      coinHistory.createdAt = Utilities.getCurrentTime();
+      coinHistory.gold = 0 - ServerConstant.CREATE_CLASS_COINS;
+      coinHistory.enAction = 'Create Class';
+      coinHistory.tcAction = '建立課堂';
+      coinHistory.scAction = '建立课堂';
+      coinHistory.saveOrUpdate(function (err, coinHistory) {
         if (err) {
           callback(err, null);
           return;
         }
-
-        var classCashBook = new ClassCashBook();
-        classCashBook.classCashBookId = uuidv4();
-        classCashBook.userId = res.userId;
-        classCashBook.classId = res.classId;
-        var tmpDateArray = Object.keys(res.time);
-        tmpDateArray.forEach(function(part, index, theArray) {
-          theArray[index] = new Date (part)
-        });
-        var tmpDate = new Date(Math.max(...tmpDateArray));
-        tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
-        classCashBook.availableAt = tmpDate.toString();
-        classCashBook.availableDate = Date.parse(tmpDate);
-        classCashBook.saveOrUpdate(function(err, classCashBook) {
+        // check duplicate email
+        let newClass = new Class();
+        Utilities.bind(data, newClass);
+        newClass.createdAt = Utilities.getCurrentTime();
+        newClass.classId = uuidv4();
+        newClass.saveOrUpdate(function(err, res) {
           if (err) {
             callback(err, null);
             return;
           }
-          response.statusCode = ServerConstant.API_CODE_OK;
-          Utilities.bind(res, response);
-          callback(null, response);
+
+          var classCashBook = new ClassCashBook();
+          classCashBook.classCashBookId = uuidv4();
+          classCashBook.userId = res.userId;
+          classCashBook.classId = res.classId;
+          var tmpDateArray = Object.keys(res.time);
+          tmpDateArray.forEach(function(part, index, theArray) {
+            theArray[index] = new Date (part)
+          });
+          var tmpDate = new Date(Math.max(...tmpDateArray));
+          tmpDate.setDate (tmpDate.getDate() + ServerConstant.THE_DAYS_CAN_GET_THE_REVENUE);
+          classCashBook.availableAt = tmpDate.toString();
+          classCashBook.availableDate = Date.parse(tmpDate);
+          classCashBook.saveOrUpdate(function(err, classCashBook) {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+            response.statusCode = ServerConstant.API_CODE_OK;
+            Utilities.bind(res, response);
+            response.user = user;
+            callback(null, response);
+          });
         });
       });
     });
