@@ -62,7 +62,7 @@ module.exports.getWalletRevenue = (event, context, callback) => {
             // Add Revenue
             if (classCashBookList[i].availableDate <= currentDate) {
               for (var j in classCashBookList[i].paymentList) {
-                  if (paymentList[j].status == 'applied') {
+                  if (classCashBookList[i].paymentList[j].status == 'applied') {
                     tutor.revenue += classCashBookList[i].paymentList[j].payment;
                   }
                   else {
@@ -73,7 +73,7 @@ module.exports.getWalletRevenue = (event, context, callback) => {
             }
             else {
               for (var j in classCashBookList[i].paymentList) {
-                  if (paymentList[j].status == 'applied') {
+                  if (classCashBookList[i].paymentList[j].status == 'applied') {
                     pendingRevenue += classCashBookList[i].paymentList[j].payment;
                   }
                   else {
