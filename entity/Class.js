@@ -22,6 +22,7 @@ class Class extends Entity {
     this.totalRatings = 0;
     this.totalComments = 0;
     this.numberOfStudent = 0;
+    this.maxNumberOfStudent = 0;
     this.studentInfo = [];
     this.tutorList = [];
   }

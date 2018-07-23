@@ -20,6 +20,7 @@ class APIResponseClassModel extends APIResponseBaseModel {
       this.totalRatings = 0;
       this.totalComments = 0;
       this.numberOfStudent = 0;
+      this.maxNumberOfStudent = 0;
       this.user = {};
       this.studentInfo = [];
       this.tutorList = [];
