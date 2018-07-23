@@ -13,6 +13,10 @@ function saveOrUpdateUserTable(data, response, callback) {
   newUser.registerAt = Utilities.getCurrentTime();
   newUser.userId = uuidv4();
   newUser.name = data.user.username;
+  if (data.extraInfo && data.extraInfo.displayName) {
+    newUser.name = data.extraInfo.displayName
+  }
+
   newUser.saveOrUpdate(function(err, user) {
     if (err) {
       callback(err, null);
