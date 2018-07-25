@@ -5,6 +5,7 @@ const uuidv4 = require('uuid/v4');
 const ServerConstant = require("../common/ServerConstant");
 const Transaction = require('../entity/Transaction');
 const Utilities = require('../common/Utilities');
+const Class = require('../entity/Class');
 
 // configure paypal with the credentials you got when you created your paypal app
 paypal.configure({
@@ -24,65 +25,149 @@ module.exports.payment = (event, context, callback) => {
       !Number.isInteger(req.body.quan) ||
       !isFinite(req.body.price)
     ) {
-    let response = {"status":"-1001", "msg":"parameter is missing/incorrect"};
+    let response = {"statusCode":-1001, "msg":"parameter is missing/incorrect"};
     callback(null, response);
     return
   }
 
-  let customObj = {
-    "userId": req.body.userId, // save the user id at custom field
-    "productType": req.body.type,
-  }
+  if (req.body.type === 'class') {
+    Class.findFirst('classId = :classId', {':classId' : req.body.sku}, function(err, classes) {
 
-  let customJson = JSON.stringify(customObj);
-
-  // create payment object
-  let createPaymentJson = {
-    "intent": "sale",
-    "payer": {
-      "payment_method": "paypal"
-    },
-    "redirect_urls": {
-      "return_url": process.env.GW_URL + "/paymentSuccess?price="+req.body.price+"&curr="+req.body.curr,
-      "cancel_url": process.env.GW_URL + "/paymentError"
-    },
-    "transactions": [{
-      "item_list": {
-        "items": [{
-          "name": req.body.name,
-          "sku": req.body.sku, //item no.
-          "price": req.body.price,
-          "currency": req.body.curr,
-          "quantity": req.body.quan,
-        }]
-      },
-      "amount": {
-        "total": req.body.price,
-        "currency": req.body.curr
-      },
-      "description": req.body.desc,
-      "custom": customJson,
-    }]
-  }
-
-  // call the create Pay method
-  createPay(createPaymentJson)
-    .then(( transaction) => {
-      var id = transaction.id;
-      var links = transaction.links;
-      var counter = links.length;
-      while( counter -- ) {
-        if ( links[counter].method == 'REDIRECT') {
-          let response = {"status":1,"redirect_url":links[counter].href,"msg":"redirect to paypal"}
-          callback(null, response);
-          return
-        }
+      if (err) {
+        callback(err, null);
+        return;
       }
+
+      let current = new Date();
+      let hasPassed = false;
+      Object.keys(classes.time).forEach(date => {
+        let tempTime = new Date (classes.time[date][0].startTime)
+        if (current - tempTime > 0) {
+          hasPassed = true;
+        }
+      })
+
+      if (hasPassed) {
+        // Already passed
+        let response = {"statusCode":-1002, "msg":"Application period has ended"};
+        callback(null, response);
+        return;
+      }
+
+      let customObj = {
+        "userId": req.body.userId, // save the user id at custom field
+        "productType": req.body.type,
+      }
+
+      let customJson = JSON.stringify(customObj);
+
+      // create payment object
+      let createPaymentJson = {
+        "intent": "sale",
+        "payer": {
+          "payment_method": "paypal"
+        },
+        "redirect_urls": {
+          "return_url": process.env.GW_URL + "/paymentSuccess?price="+req.body.price+"&curr="+req.body.curr,
+          "cancel_url": process.env.GW_URL + "/paymentError"
+        },
+        "transactions": [{
+          "item_list": {
+            "items": [{
+              "name": req.body.name,
+              "sku": req.body.sku, //item no.
+              "price": req.body.price,
+              "currency": req.body.curr,
+              "quantity": req.body.quan,
+            }]
+          },
+          "amount": {
+            "total": req.body.price,
+            "currency": req.body.curr
+          },
+          "description": req.body.desc,
+          "custom": customJson,
+        }]
+      }
+
+      // call the create Pay method
+      createPay(createPaymentJson)
+        .then(( transaction) => {
+          var id = transaction.id;
+          var links = transaction.links;
+          var counter = links.length;
+          while( counter -- ) {
+            if ( links[counter].method == 'REDIRECT') {
+              let response = {"statusCode":200,"redirect_url":links[counter].href,"msg":"redirect to paypal"}
+              callback(null, response);
+              return
+            }
+          }
+        })
+        .catch((err) => {
+          console.log( err );
+          callback(err, null);
+        });
+
     })
-    .catch((err) => {
-      console.log( err );
-      callback(err, null);
-    });
+  }
+  else {
+    let customObj = {
+      "userId": req.body.userId, // save the user id at custom field
+      "productType": req.body.type,
+    }
+
+    let customJson = JSON.stringify(customObj);
+
+    // create payment object
+    let createPaymentJson = {
+      "intent": "sale",
+      "payer": {
+        "payment_method": "paypal"
+      },
+      "redirect_urls": {
+        "return_url": process.env.GW_URL + "/paymentSuccess?price="+req.body.price+"&curr="+req.body.curr,
+        "cancel_url": process.env.GW_URL + "/paymentError"
+      },
+      "transactions": [{
+        "item_list": {
+          "items": [{
+            "name": req.body.name,
+            "sku": req.body.sku, //item no.
+            "price": req.body.price,
+            "currency": req.body.curr,
+            "quantity": req.body.quan,
+          }]
+        },
+        "amount": {
+          "total": req.body.price,
+          "currency": req.body.curr
+        },
+        "description": req.body.desc,
+        "custom": customJson,
+      }]
+    }
+
+    // call the create Pay method
+    createPay(createPaymentJson)
+      .then(( transaction) => {
+        var id = transaction.id;
+        var links = transaction.links;
+        var counter = links.length;
+        while( counter -- ) {
+          if ( links[counter].method == 'REDIRECT') {
+            let response = {"statusCode":200,"redirect_url":links[counter].href,"msg":"redirect to paypal"}
+            callback(null, response);
+            return
+          }
+        }
+      })
+      .catch((err) => {
+        console.log( err );
+        callback(err, null);
+      });
+  }
+
 }
 
 // success
