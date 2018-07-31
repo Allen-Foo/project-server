@@ -3,6 +3,8 @@ const s3 = new AWS.S3();
 var Utilities = require('../common/Utilities');
 const ServerConstant = require("../common/ServerConstant");
 const User = require('../entity/User');
+const TutorInformation = require('../entity/TutorInformation');
+const CompanyInformation = require('../entity/CompanyInformation');
 const APIResponseUserModel = require('../apiResponseModel/APIResponseUserModel');
 
 module.exports.updateProfile = (event, context, callback) => {
@@ -26,9 +28,56 @@ module.exports.updateProfile = (event, context, callback) => {
         callback(err, null);
         return;
       }
-      response.statusCode = ServerConstant.API_CODE_OK;
-      Utilities.bind(user, response);
-      callback(null, response);
+
+      if (user.userRole == 'learner') {
+        // Learner, Done
+        response.statusCode = ServerConstant.API_CODE_OK;
+        Utilities.bind(user, response);
+        callback(null, response);
+      }
+      else if (user.userRole == 'tutor') {
+        // Tutor, need to update tutorInformation
+        TutorInformation.findFirst('userId = :userId', {':userId' : user.userId}, function(err, tutor) {
+          if (err || tutor == null) {
+            callback(err, null);
+            return;
+          }
+          Utilities.bind(data.user, tutor);
+          tutor.saveOrUpdate(function(err, tutor) {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+            // Done
+            response.statusCode = ServerConstant.API_CODE_OK;
+            Utilities.bind(user, response);
+            callback(null, response);
+          });
+
+        });
+      }
+      else if (user.userRole == 'company') {
+        // Company, need to update companyInformation
+        CompanyInformation.findFirst('userId = :userId', {':userId' : user.userId}, function(err, company) {
+          if (err || company == null) {
+            callback(err, null);
+            return;
+          }
+          Utilities.bind(data.user, company);
+          company.saveOrUpdate(function(err, company) {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+            // Done
+            response.statusCode = ServerConstant.API_CODE_OK;
+            Utilities.bind(user, response);
+            callback(null, response);
+          });
+
+        });
+      }
+
     });
 	})
 };
