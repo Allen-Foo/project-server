@@ -7,6 +7,7 @@ const Refund = require('../entity/Refund');
 const Product = require('../entity/Product');
 const CoinHistory = require('../entity/CoinHistory');
 const TutorInformation = require('../entity/TutorInformation');
+const CompanyInformation = require('../entity/CompanyInformation');
 const ClassCashBook = require('../entity/ClassCashBook');
 const ApplyClass = require('../entity/ApplyClass');
 const Transaction = require('../entity/Transaction');
@@ -22,6 +23,7 @@ const APIResponsePaypalReportModel = require('../apiResponseModel/APIResponsePay
 const APIResponseWithdrawnReportModel = require('../apiResponseModel/APIResponseWithdrawnReportModel');
 const APIResponseRefundReportModel = require('../apiResponseModel/APIResponseRefundReportModel');
 const APIResponseWithdrawnRecordModel = require('../apiResponseModel/APIResponseWithdrawnRecordModel');
+const pushNotificationHandler = require('../pushNotification/handler')
 const Utilities = require('../common/Utilities');
 const async = require("async");
 
@@ -31,7 +33,7 @@ module.exports.getWalletRevenue = (event, context, callback) => {
 
   var response = new APIResponseRevenueModel();
 
-  if (!data.userId) {
+  if (!data.userId || !data.userRole) {
     response.statusCode = ServerConstant.API_CODE_INVALID_PARAMS;
     callback(null, response);
     return;
@@ -50,8 +52,19 @@ module.exports.getWalletRevenue = (event, context, callback) => {
           callback(err, null);
           return;
         }
-
-        TutorInformation.findFirst('userId = :userId', {':userId' : data.userId}, function(err, tutor) {
+        var table = {};
+        if (data.userRole == 'tutor') {
+          table = TutorInformation;
+        }
+        else if (data.userRole == 'company') {
+          table = CompanyInformation;
+        }
+        else {
+          response.statusCode = ServerConstant.API_CODE_INVALID_PARAMS;
+          callback(null, response);
+          return;
+        }
+        table.findFirst('userId = :userId', {':userId' : data.userId}, function(err, tutor) {
           if (err) {
             callback(err, null);
             return;
@@ -112,7 +125,19 @@ module.exports.getWalletRevenue = (event, context, callback) => {
       })
     }
     else {
-      TutorInformation.findFirst('userId = :userId', {':userId' : data.userId}, function(err, tutor) {
+      var table = {};
+      if (data.userRole == 'tutor') {
+        table = TutorInformation;
+      }
+      else if (data.userRole == 'company') {
+        table = CompanyInformation;
+      }
+      else {
+        response.statusCode = ServerConstant.API_CODE_INVALID_PARAMS;
+        callback(null, response);
+        return;
+      }
+      table.findFirst('userId = :userId', {':userId' : data.userId}, function(err, tutor) {
         if (err) {
           callback(err, null);
           return;
@@ -176,9 +201,18 @@ module.exports.applyWithdrawn = (event, context, callback) => {
             withdrawn.createdAt = Utilities.getCurrentTime();
             withdrawn.progress = 'processing';
             withdrawn.saveOrUpdate(function(err,tutor){
-              response.statusCode = ServerConstant.API_CODE_OK;
-              Utilities.bind(tutor, response);
-              callback(null, response);
+              if (err) {
+                callback(err, null);
+                return;
+              }
+              var params = {};
+              params.body = {};
+              params.body.content = '有新的提款: ' + user.name + '申請提取' + data.amount + '元';
+              pushNotificationHandler.pushWebNotification (params,  null, function (err, result) {
+                response.statusCode = ServerConstant.API_CODE_OK;
+                Utilities.bind(tutor, response);
+                callback(null, response);
+              });
             });
           });
         }

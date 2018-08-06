@@ -428,7 +428,7 @@ functions:
           method: post
           cors: true
           integration: lambda
-    
+
   getWithdrawnList:
     handler: wallet/handler.getWithdrawnList
     events:
@@ -506,6 +506,43 @@ functions:
     events:
       - http:
           path: getRefundReport
+          method: post
+          cors: true
+          integration: lambda
+
+  pushWebNotification:
+    handler: pushNotification/handler.pushWebNotification
+    events:
+      - http:
+          path: pushWebNotification
+          method: post
+          cors: true
+          integration: lambda
+
+  updateWebSubscription:
+    handler: pushNotification/handler.updateWebSubscription
+    events:
+      - http:
+          path: updateWebSubscription
+          method: post
+          cors: true
+          integration: lambda
+
+  getAdvertisement:
+    handler: advertisement/handler.getAdvertisement
+    events:
+      - http:
+          path: getAdvertisement
+          method: post
+          cors: true
+          integration: lambda
+
+  updateAdvertisement:
+    handler: advertisement/handler.updateAdvertisement
+    role: myCustRole0
+    events:
+      - http:
+          path: updateAdvertisement
           method: post
           cors: true
           integration: lambda

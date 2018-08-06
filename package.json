@@ -16,7 +16,8 @@
     "sha1": "^1.1.1",
     "uuid": "^3.1.0",
     "wait.for": "^0.6.6",
-    "wait.for-es6": "^0.1.0"
+    "wait.for-es6": "^0.1.0",
+    "web-push": "^3.3.2"
   },
   "devDependencies": {
     "serverless-nested-stack": "0.0.7"
