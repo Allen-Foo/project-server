@@ -8,7 +8,7 @@ class TutorInformation extends Entity {
     this.userId = 'null';
     this.selfIntro = 'null';
     this.experience = '';
-    this.achievement = '';
+    this.achievementList = '';
     this.profession = '';
     this.revenue = 0;
     this.pendingRevenue = 0;

@@ -262,7 +262,7 @@ module.exports.getTutorList = (event, context, callback) => {
  *        "selfIntro": ""
  *        "profession": ""
  *        "experience": ""
- *        "achievement": ""
+ *        "achievementList": ""
  *     }
  *
  * @apiError NotAuthorizied The id of the tutor was not found.
@@ -317,7 +317,7 @@ module.exports.getTutorDetail = (event, context, callback) => {
       response.selfIntro = tutorInfo.selfIntro;
       response.profession = tutorInfo.profession;
       response.experience = tutorInfo.experience;
-      response.achievement = tutorInfo.achievement;
+      response.achievementList = tutorInfo.achievementList;
 
       response.statusCode = ServerConstant.API_CODE_OK;
 

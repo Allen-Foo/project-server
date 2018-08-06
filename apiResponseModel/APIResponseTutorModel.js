@@ -8,7 +8,7 @@ class APIResponseTutorModel extends APIResponseBaseModel {
       this.selfIntro = '';
       this.profession = '';
       this.experience = 0;
-      this.achievement = '';
+      this.achievementList = '';
 
     }
 }
